@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>SQL to string wrapper</title>
-
-	<script src="wrapSQLLite.js"></script>
+	<title>hj-s utils</title>
 
 	<style>
 		body{
@@ -14,110 +12,10 @@
 			margin-bottom: 5px;
 			margin-top: 5px;
 		}
-		label{
-			font-family: monospace;
-		}
-		textarea{
-			vertical-align: top;
-			overflow: auto;
-			width: 48%;
-		}
-		textarea:-moz-read-only{
-			background-color: #dddddd;
-		}
-		textarea:read-only{
-			background-color: #dddddd;
-		}
-		.copyText{
-			font-family: monospace;
-		}
 	</style>
-
-	<script>
-		const inputPlaceHolder = `type SQL request here	\n\twrap button will make indent on simple keywords \n\tsurround will put format your text into one string for OpenScript`;
-		function domReady(f){ 
-			if (document.readyState === "complete"){
-				f();
-			}else{
-				setTimeout(domReady,16,f);
-			}
-		}
-		function resize(event){
-			event.target.style.height = 'auto';
-			event.target.style.height = event.target.scrollHeight + 20 +'px';
-		}
-		function delayedResize(event){
-			window.setTimeout(resize, 0, event);
-		}
-		function addResizeTextArea() {
-			document.querySelectorAll('textarea').forEach(function(textarea){
-				textarea.addEventListener('change',  resize, false);
-				textarea.addEventListener('cut',     delayedResize, false);
-				textarea.addEventListener('paste',   delayedResize, false);
-				textarea.addEventListener('drop',    delayedResize, false);
-				textarea.addEventListener('keydown', delayedResize, false);
-			});
-		}
-		function copyToClipboard(str){
-			const el = document.createElement('textarea');
-			el.value = str;
-			document.body.appendChild(el);
-			el.select();
-			document.execCommand('copy');
-			document.body.removeChild(el);
-			copyInfo();
-		}
-		function hideCopyInfo(){
-			document.body.removeChild(document.getElementById("infoDiv"));
-		}
-		function copyInfo(){
-			const el = document.createElement('div');
-			el.innerHTML = "output copied to clipboard";
-			el.id = "infoDiv";
-			el.classList.add = "copyText";
-			document.body.appendChild(el);
-			setTimeout(hideCopyInfo, 1000);
-		}
-
-		function wrapSQLTextarea(action){
-			var backslash = document.getElementById("backslash").checked;
-			document.getElementById("outputSQL").value = document.getElementById("inputSQL").value.wrap(action, {"backslash": backslash});
-			copyToClipboard(document.getElementById("outputSQL").value);
-			document.getElementById("outputSQL").dispatchEvent( new Event('change'));
-		};
-		function copyOutput(){
-			copyToClipboard(document.getElementById("outputSQL").value);
-		};
-		function clearTextArea(){
-			document.getElementById("inputSQL").value = "";
-			document.getElementById("inputSQL").dispatchEvent( new Event('change'));
-			document.getElementById("outputSQL").value = "";
-			document.getElementById("outputSQL").dispatchEvent( new Event('change'));	
-		}
-		function putPlaceHolder(){
-			document.getElementById("inputSQL").placeholder  = inputPlaceHolder;
-		}
-
-		//...
-		domReady(addResizeTextArea);
-		domReady(putPlaceHolder);
-	</script>
 </head>
 <body>
-	<br>
-	<input type="checkbox" id="backslash" name="backslash"><label for="backslash">add backslash</label>
-
-
-	<input type="button" name="wrap" value="wrap" onclick="wrapSQLTextarea('wrap');">
-	<input type="button" name="surround" value="surround" onclick="wrapSQLTextarea('surround');">
-	<input type="button" name="clear" value="clear" onclick="clearTextArea();">
-	<input type="button" name="copyOutput" value="copy output" onclick="copyOutput();">
-
-	<br>
-	
-	<textarea id="inputSQL" rows="4"  placeholder="inputPlaceHolder" autofocus></textarea>
-	<textarea id="outputSQL" rows="4"  placeholder="get wrapped SQL" readonly=""></textarea>
-
+	<input type="button" onclick="location.href='html/sqlwrapper.html';" value="sql wrapper">
 </body>
 </html>
 	
