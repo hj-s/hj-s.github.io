@@ -4,34 +4,7 @@
 	<title>SQL to string wrapper</title>
 
 	<script src="../js/wrapSQLLite.js"></script>
-
-	<style>
-		body{
-			text-align: center;
-		}
-		input{
-			font-family: monospace;
-			margin-bottom: 5px;
-			margin-top: 5px;
-		}
-		label{
-			font-family: monospace;
-		}
-		textarea{
-			vertical-align: top;
-			overflow: auto;
-			width: 48%;
-		}
-		textarea:-moz-read-only{
-			background-color: #dddddd;
-		}
-		textarea:read-only{
-			background-color: #dddddd;
-		}
-		.copyText{
-			font-family: monospace;
-		}
-	</style>
+	<link rel="stylesheet" href="../css/wrapSQLLite.css">
 
 	<script>
 		const inputPlaceHolder = `type SQL request here	\n\twrap button will make indent on simple keywords \n\tsurround will put format your text into one string for OpenScript`;
@@ -108,10 +81,10 @@
 	<input type="checkbox" id="backslash" name="backslash"><label for="backslash">add backslash</label>
 
 
-	<input type="button" name="wrap" value="wrap" onclick="wrapSQLTextarea('wrap');">
-	<input type="button" name="surround" value="surround" onclick="wrapSQLTextarea('surround');">
-	<input type="button" name="clear" value="clear" onclick="clearTextArea();">
-	<input type="button" name="copyOutput" value="copy output" onclick="copyOutput();">
+	<input type="button" class="button button-small" name="wrap" value="wrap" onclick="wrapSQLTextarea('wrap');">
+	<input type="button" class="button button-small" name="surround" value="surround" onclick="wrapSQLTextarea('surround');">
+	<input type="button" class="button button-small" name="clear" value="clear" onclick="clearTextArea();">
+	<input type="button" class="button button-small" name="copyOutput" value="copy output" onclick="copyOutput();">
 
 	<br>
 	
