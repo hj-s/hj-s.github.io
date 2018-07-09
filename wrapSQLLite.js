@@ -1,5 +1,5 @@
 const isDefined = (check) => (check !== undefined);
-const isFeature = (check, property) => (check.hasOwnProperty(property));
+const isFeature = (check, property) => ( isDefined(check) ? check.hasOwnProperty(property) : false);
 
 const dhcomma = `"`;
 const hcomma = `'`;
