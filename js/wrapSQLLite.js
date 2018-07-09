@@ -1,6 +1,5 @@
 const isDefined = (check) => (check !== undefined);
 const isFeature = (check, property) => ( isDefined(check) ? check.hasOwnProperty(property) : false);
-const log = () => console.log(this);
 
 const dhcomma = `"`;
 const hcomma = `'`;
@@ -39,8 +38,8 @@ var scomma, endLine, newLine;
 // 	};
 // }
 (!String.prototype.surrondLite) ? 
-	String.prototype.surrondLite = function(){ return this.replace(new RegExp(line,`g`), newLine) } : 
-	console.log(`surrondLite is used`);
+	String.prototype.surrondLite = function(){ return this.replace(new RegExp(line,`g`), newLine) } 
+	: console.log(`surrondLite is used`);
 
 // wrap keyword
 // if (!String.prototype.wrapKeywordLite){String.prototype.wrapKeywordLite = function(keyword, wrapper){
