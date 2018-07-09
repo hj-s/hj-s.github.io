@@ -10,8 +10,12 @@
 			text-align: center;
 		}
 		input{
+			font-family: monospace;
 			margin-bottom: 5px;
 			margin-top: 5px;
+		}
+		label{
+			font-family: monospace;
 		}
 		textarea{
 			vertical-align: top;
@@ -75,8 +79,9 @@
 			setTimeout(hideCopyInfo, 1000);
 		}
 
-		function wrapSQLTextarea(action){	
-			document.getElementById("outputSQL").value = document.getElementById("inputSQL").value.wrap(action);
+		function wrapSQLTextarea(action){
+			var backslash = document.getElementById("backslash").checked;
+			document.getElementById("outputSQL").value = document.getElementById("inputSQL").value.wrap(action, {"backslash": backslash});
 			copyToClipboard(document.getElementById("outputSQL").value);
 			document.getElementById("outputSQL").dispatchEvent( new Event('change'));
 		};
@@ -100,7 +105,9 @@
 </head>
 <body>
 	<br>
-	
+	<input type="checkbox" id="backslash" name="backslash"><label for="backslash">add backslash</label>
+
+
 	<input type="button" name="wrap" value="wrap" onclick="wrapSQLTextarea('wrap');">
 	<input type="button" name="surround" value="surround" onclick="wrapSQLTextarea('surround');">
 	<input type="button" name="clear" value="clear" onclick="clearTextArea();">

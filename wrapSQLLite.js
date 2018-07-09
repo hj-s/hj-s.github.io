@@ -1,3 +1,5 @@
+const isDefined = (check) => (check !== undefined);
+
 const dhcomma = `"`;
 const hcomma = `'`;
 const tab = `\t`;
@@ -80,25 +82,27 @@ var scomma, endLine, newLine;
 (!String.prototype.surroundLinesWith) ? String.prototype.surroundLinesWith = function(){ return this.surroundWith(line, endLine, scomma)} : console.log(`surroundLinesWith is used`);
 
 //init wrapper args
-(!String.prototype.initWrap) ? String.prototype.initWrap = function(args){
+(!String.prototype.initWrap) ? String.prototype.initWrap = function(args = undefined){
+	let backslash = true;
+	(isDefined(args) && isDefined(args.backslash)) ? backslash = args.backslash : {};
 	scomma = hcomma;
-	endLine = space + scomma + space + plus + space + bslash + space;
+	backslash ? endLine = space + scomma + space + plus + space + bslash : endLine = space + scomma + space + plus;
 	newLine = endLine + line + scomma;
 	return this;
 } : console.log(`initWrap is used`);
 
 //main function wrap
-(!String.prototype.wrap) ? String.prototype.wrap = function(action){
+(!String.prototype.wrap) ? String.prototype.wrap = function(action, args = undefined){
 	console.log(`source: ` + line + this + line);	
 	var str = ``;
 	switch (action) {
 		case `wrap`: 
-			str = this.initWrap().trim()
+			str = this.initWrap(args).trim()
 					.InComma()
 					.handleSQL();
 			break;
 		case `surround`:
-			str = this.initWrap().trim()
+			str = this.initWrap(args).trim()
 					.InComma()
 					.surrondLite();
 			break;
