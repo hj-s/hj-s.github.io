@@ -1,4 +1,5 @@
 const isDefined = (check) => (check !== undefined);
+const isFeature = (check, property) => (check.hasOwnProperty(property));
 
 const dhcomma = `"`;
 const hcomma = `'`;
@@ -7,6 +8,7 @@ const line = `\n`;
 const bslash = `\\`;
 const space = ` `;
 const plus = `+`;
+const nt = ``;
 const keywordsSingle = [`from `, `order by `, `where `, `inner join `, `outer join `, `left join `,`group by `];
 const keyrowdsMany = [ ` on `, ` and `, ` or `];
 
@@ -83,10 +85,15 @@ var scomma, endLine, newLine;
 
 //init wrapper args
 (!String.prototype.initWrap) ? String.prototype.initWrap = function(args = undefined){
-	let backslash = true;
-	(isDefined(args) && isDefined(args.backslash)) ? backslash = args.backslash : {};
+	//check args
+	let backslash = false;
+	if (isDefined(args) && isFeature(args, `backslash`)) {
+		backslash = args.backslash;
+	}
+
+	//init 
 	scomma = hcomma;
-	backslash ? endLine = space + scomma + space + plus + space + bslash : endLine = space + scomma + space + plus;
+	endLine = space + scomma + space + plus + (backslash ? space + bslash : nt);
 	newLine = endLine + line + scomma;
 	return this;
 } : console.log(`initWrap is used`);
@@ -107,11 +114,10 @@ var scomma, endLine, newLine;
 					.surrondLite();
 			break;
 		default:
-			str = `Invalid action`
+			str = `Invalid action`;
 			console.log(str);
 			break;
 	}
 	console.log(`result: ` + line + str);
 	return str
 } : console.log(`wrap is used`);
-
