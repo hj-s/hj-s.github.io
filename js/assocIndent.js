@@ -10,8 +10,8 @@ const line = `\n`;
 (!String.prototype.indentAssocSrting) ?
 	String.prototype.indentAssocSrting = function(){
 		var str = this
-		var tag = ``;
-		var indent = true;
+		var tag = ``
+		var indent = true
 		for (let i = 0; i < str.length; i++){
 			switch (str[i]) {
 				case `,`:
@@ -29,6 +29,9 @@ const line = `\n`;
 					tag = (tag == tab) ? `` : tag.replace(new RegExp(tab+tab), tab)
 					str = str.insertStr(i, "\n"+tag)
 					i += tag.length+1
+					break
+				case `'`:
+					indent = !indent
 					break
 				case `{`:
 					if (i > 0) indent = (str[i-1] == `=`) ? true : false;
