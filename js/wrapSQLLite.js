@@ -107,7 +107,6 @@ var scomma, endLine, newLine;
 		if (isDefined(args) && isFeature(args, `backslash`)) {
 			backslash = args.backslash
 		}
-
 		//init 
 		scomma = hcomma
 		endLine = space + scomma + space + plus + (backslash ? space + bslash : nt)

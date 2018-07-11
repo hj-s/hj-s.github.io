@@ -48,3 +48,8 @@ textarea:read-only{
 .button:active {
   transform: translateY(4px);
 }
+.button-left{
+	text-align: left;
+	float: left;
+	margin-right: -42px;
+}
