@@ -20,9 +20,6 @@ textarea:-moz-read-only{
 textarea:read-only{
 	background-color: #dddddd;
 }
-.copyText{
-	font-family: monospace;
-}
 .button{
 	-webkit-transition-duration: 0.4s;
 	transition-duration: 0.4s;
@@ -52,4 +49,16 @@ textarea:read-only{
 	text-align: left;
 	float: left;
 	margin-right: -42px;
+}
+.copyMessage{
+	position: fixed;
+	background-color: #e7e7e7; 
+	border: none;
+	color: black;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	top: 5px;
+	right: 5px;
+	font-family: monospace;
 }

@@ -47,7 +47,8 @@
 			const el = document.createElement('div');
 			el.innerHTML = "output copied to clipboard";
 			el.id = "infoDiv";
-			el.classList.add = "copyText";
+			el.classList.add("copyMessage");
+			el.classList.add("button-small");
 			document.body.appendChild(el);
 			setTimeout(hideCopyInfo, 1000);
 		}
@@ -93,4 +94,3 @@
 
 </body>
 </html>
-	
