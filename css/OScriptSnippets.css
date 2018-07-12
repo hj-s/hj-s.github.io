@@ -3,8 +3,6 @@ body{
 }
 input{
 	font-family: monospace;
-	margin-bottom: 5px;
-	margin-top: 5px;
 }
 label{
 	font-family: monospace;
@@ -12,7 +10,7 @@ label{
 textarea{
 	vertical-align: top;
 	overflow: auto;
-	width: 48%;
+	width: 74%;
 }
 textarea:-moz-read-only{
 	background-color: #dddddd;
@@ -34,6 +32,7 @@ textarea:read-only{
 	display: inline-block;
 }
 .button-big {
+	width: 24%;
 	padding: 10px 24px;
 	font-size: 16px;
 }

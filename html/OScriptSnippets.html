@@ -3,11 +3,11 @@
 <head>
 	<title>OScript snippets</title>
 
-	<link rel="import" href="../snippets/OsEs.sublime-snippet">
 	<link rel="import" href="../snippets/OsFunction.sublime-snippet">
 	<link rel="import" href="../snippets/OsNode.sublime-snippet">
 	<link rel="import" href="../snippets/OsSql.sublime-snippet">
 	<link rel="import" href="../snippets/OsTest.sublime-snippet">
+	<link rel="import" href="../snippets/OsEs.sublime-snippet">
 
 	<link rel="stylesheet" href="../css/OScriptSnippets.css">
 
@@ -35,38 +35,27 @@
 				textarea.addEventListener('keydown', delayedResize, false);
 			});
 		}
-		function copyToClipboard(str){
-			const el = document.createElement('textarea');
-			el.value = str;
-			document.body.appendChild(el);
-			el.select();
-			document.execCommand('copy');
-			document.body.removeChild(el);
-			copyInfo();
-		}
 		function hideCopyInfo(){
 			document.body.removeChild(document.getElementById("infoDiv"));
 		}
 		function copyInfo(){
 			const el = document.createElement('div');
-			el.innerHTML = "output copied to clipboard";
+			el.innerHTML = "snippet copied to clipboard";
 			el.id = "infoDiv";
 			el.classList.add("copyMessage");
 			el.classList.add("button-small");
 			document.body.appendChild(el);
 			setTimeout(hideCopyInfo, 1000);
 		}
-		function downloadSnippet(snippetName) {
+		function downloadSnippet(el) {
 			var link = document.createElement("a");
 			link.href = "../snippets/" + snippetName + ".sublime-snippet"
 			document.body.appendChild(link);
 			link.click();
 			document.body.removeChild(link);
 			delete link;
+			copyInfo();
 		}
-		function copySnippet(){
-			copyToClipboard(document.getElementById("outpuAssoc").value);
-		};
 
 		function importSnippets(){
 			var snippetLength = document.querySelectorAll('link[rel="import"]').length
@@ -82,6 +71,7 @@
 				el.type = "button"
 				el.name = snippetName
 				el.value = "copy "+ snippetName + " snippet"
+				el.onclick = function (){ downloadSnippet(snippetName) }
 				el.onclick = `downloadSnippet("`+ snippetName + `");`
 				el.classList.add("button");
 				el.classList.add("button-big");
@@ -95,7 +85,6 @@
 				el.readOnly = true
 				document.body.appendChild(el);
 				document.body.appendChild(document.createElement("BR"));
-				//document.getElementById(snippetName).dispatchEvent( new Event('change'));
 			}
 		}
 		function resizeSnippets(){
