@@ -1,0 +1,21 @@
+<snippet>
+	<content><![CDATA[
+public void function test()
+	Dynamic 	result
+	Object 		prgCtx = \$RecMan.RIMSUtils._GetPrgCtx()
+	Object	  	dbConnect = prgCtx.fDbConnect
+	CAPICONNECT	dbConnection= dbConnect.fConnection
+	DAPISESSION dSession = prgCtx.dSession().fSession
+	
+
+	//code
+	$1
+
+	return 
+end
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>OsTest</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.os</scope>
+</snippet>

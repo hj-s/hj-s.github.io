@@ -1,0 +1,40 @@
+<snippet>
+	<content><![CDATA[
+Dynamic nErrList
+List errList
+DAPINODE node 
+DAPIVERSION nodeVersion
+result = DAPI.GetNodeByID(dSession, objId)
+if isError(result)
+	nErrList = dSession.CheckError(result)
+	if isFeature(nErrList, 'ErrorList') && length(nErrList.ErrorList) > 0
+		errList = nErrList.ErrorList
+	end
+	retval.errMsg = Error.ErrortoString(result)
+	retval.errLsit = errList
+	return retval
+else
+	node = result
+
+	result = DAPI.GetVersion(node, node.pVersionNum);
+	if isError(result) 
+		nErrList = dSession.CheckError(result)
+		if isFeature(nErrList, 'ErrorList') && length(nErrList.ErrorList) > 0
+			errList = nErrList.ErrorList
+		end
+		retval.errMsg = Error.ErrortoString(result)
+		retval.errLsit = errList
+		return retval
+	else
+
+	//code
+	$1
+
+	end
+end
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>OsNode</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.os</scope>
+</snippet>

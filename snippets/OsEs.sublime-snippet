@@ -1,0 +1,86 @@
+<snippet>
+	<content><![CDATA[
+public 		String		f$1 = '$2';
+
+public	function Assoc $3( \
+	Object			prgCtx, \
+	WAPIWORK		work, \
+	Integer			workID, \  
+	Integer			subWorkID, \
+	Integer			taskID, \
+	Integer			returnSubWorkID, \
+	Integer			returnTaskID, \
+	Dynamic			extraData = Undefined) 
+
+	Dynamic			result
+    Record			workPackage
+
+    Object			prgCtxAdmin = $RecMan.RIMSUtils._GetPrgCtx()
+	Object			dbConnect = prgCtx.fDbConnect
+	CAPICONNECT		dbConnection= dbConnect.fConnection
+	DAPISESSION 	dSession = prgCtxAdmin.dSession().fSession
+	Object			dapiCtx	= prgCtxAdmin.DSession()
+
+    //Attrs
+    Object			attrObj = $WFMain.WFPackageSubsystem.GetItemByName( 'WFAttributes' )
+    Record			attrsPkg
+	Assoc			attrs
+
+	//Forms
+	Object			formObj	= $WFMain.WFPackageSubsystem.GetItemByName('Form')
+    Record			formPkg
+    List			forms
+	Assoc			form
+
+	//Attach
+	Object			attachObj = $WFMain.WFPackageSubsystem.GetItemByName( 'DAPIAttachments' )
+    Record			attachPkg
+    Dynamic 		attrFolderID
+	
+    //WF
+	RecArray		workData = $WFMain.WAPIPkg.LoadWorkData( prgCtx, work )
+	for workPackage in workData
+		if { workPackage.Type, workPackage.SubType } == { formObj.fType, formObj.fSubType }
+			formPkg = workPackage
+		end
+		if ( { workPackage.TYPE, workPackage.SUBTYPE } == { attrObj.fType, attrObj.fSubType } )
+			attrsPkg = workPackage
+		end
+		if ( { workPackage.TYPE, workPackage.SUBTYPE } == { attachObj.fType, attachObj.fSubType } )
+			attachPkg = workPackage
+		end
+	end
+
+	if isUndefined(attrsPkg)
+		prgCtx.WSession().fErrorMsg = 'AttrSPackageUndefined'
+		return false
+	else
+		attrs = attrsPkg.USERDATA
+	end
+
+	if isUndefined(formPkg)
+		prgCtx.WSession().fErrorMsg = 'FormsPackageUndefined'
+		return false
+	else
+		forms = formPkg.USERDATA.Forms
+		form = forms[1]
+	end 
+
+	if isUndefined(attachFolderID)
+		prgCtx.WSession().fErrorMsg = 'AtachrFolderUndefined'
+		return false
+	else
+		attachFolderID = attachPkg.USERDATA
+	end 
+
+	//code
+	$4
+
+	return Undefined
+end
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>OsEs</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.os</scope>
+</snippet>

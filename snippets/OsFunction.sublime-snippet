@@ -1,6 +1,6 @@
 <snippet>
 	<content><![CDATA[
-public function Assoc functionName(Object prgCtx,  $1 )
+public function Assoc $1(Object prgCtx,  $2 )
 	Object		dbConnect = prgCtx.fDbConnect
 	CAPICONNECT	dbConnection= dbConnect.fConnection
 	DAPISESSION dSession = prgCtx.dSession().fSession
@@ -12,7 +12,7 @@ public function Assoc functionName(Object prgCtx,  $1 )
 
 
 	//code
-	$2
+	$3
 
 	retval.ok = TRUE;
 	return retval

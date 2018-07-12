@@ -3,7 +3,12 @@
 <head>
 	<title>OScript snippets</title>
 
-	<link rel="import" href="../snippets/OScritpFunction.sublime-snippet">
+	<link rel="import" href="../snippets/OsEs.sublime-snippet">
+	<link rel="import" href="../snippets/OsFunction.sublime-snippet">
+	<link rel="import" href="../snippets/OsNode.sublime-snippet">
+	<link rel="import" href="../snippets/OsSql.sublime-snippet">
+	<link rel="import" href="../snippets/OsTest.sublime-snippet">
+
 	<link rel="stylesheet" href="../css/OScriptSnippets.css">
 
 	<script>
@@ -55,44 +60,21 @@
 		function copySnippet(){
 			copyToClipboard(document.getElementById("outpuAssoc").value);
 		};
-		function httpGet(theUrl)
-		{
-		    if (window.XMLHttpRequest)
-		    {// code for IE7+, Firefox, Chrome, Opera, Safari
-		        xmlhttp=new XMLHttpRequest();
-		    }
-		    else
-		    {// code for IE6, IE5
-		        xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-		    }
-		    xmlhttp.onreadystatechange=function()
-		    {
-		        if (xmlhttp.readyState==4 && xmlhttp.status==200)
-		        {
-		            return xmlhttp.responseText;
-		        }
-		    }
-		    xmlhttp.open("GET", theUrl, false );
-		    xmlhttp.send();    
+
+		function importSnippets(){
+			var content = document.querySelector('link[rel="import"]').import;
 		}
 
 		//...
+		domReady(importSnippets);
 		domReady(addResizeTextArea);
+
 	</script>
 </head>
 <body>
 	<br>
 	<input type="button" class="button button-small button-left" name="back" onclick="history.back()" value="< back">
 	<br>
-	<br>
-	<input type="button" class="button button-big" name="copyOutput" value="copy snippet" onclick="copySnippet();">
-	<textarea id="snippet" rows="4"  placeholder="" readonly=""></textarea>
-	<br>
-	<input type="button" class="button button-big" name="copyOutput" value="copy snippet" onclick="copySnippet();">
-	<textarea id="snippet" rows="4"  placeholder="" readonly=""></textarea>
-	<br>
-	<input type="button" class="button button-big" name="copyOutput" value="copy snippet" onclick="copySnippet();">
-	<textarea id="snippet" rows="4"  placeholder="" readonly=""></textarea>
 	<br>
 	<input type="button" class="button button-big" name="copyOutput" value="copy snippet" onclick="copySnippet();">
 	<textarea id="snippet" rows="4"  placeholder="" readonly=""></textarea>
