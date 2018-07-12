@@ -54,7 +54,6 @@
 			el.classList.add("copyMessage");
 			el.classList.add("button-small");
 			document.body.appendChild(el);
-			document.body.appendChild(el);
 			setTimeout(hideCopyInfo, 1000);
 		}
 		function copySnippet(){
@@ -62,7 +61,30 @@
 		};
 
 		function importSnippets(){
-			var content = document.querySelector('link[rel="import"]').import;
+			var snippetLength = document.querySelectorAll('link[rel="import"]').length
+			for (let i = 0; i < snippetLength; i++){
+				let snippet = document.querySelectorAll('link[rel="import"]')[i].import
+				let snippetName = snippet.querySelector('tabTrigger').innerHTML
+				let snippetText = snippet.querySelector('content').innerHTML.replace(/<!--\[CDATA\[\n|\]\]-->/g, "")
+
+				let el = document.createElement('input')
+				el.type = "button"
+				el.name = snippetName
+				el.value = "copy snippet"
+				el.classList.add("button");
+				el.classList.add("button-big");
+				document.body.appendChild(el);
+				
+				document.body.innerHTML += ' ';
+
+				el = document.createElement('textarea')
+				el.innerHTML = snippetText
+				el.id = snippetName
+				el.readOnly = true
+				document.body.appendChild(el);
+				document.body.appendChild(document.createElement("BR"));
+				//document.getElementById(snippetName).dispatchEvent( new Event('change'));
+			}
 		}
 
 		//...
@@ -76,8 +98,6 @@
 	<input type="button" class="button button-small button-left" name="back" onclick="history.back()" value="< back">
 	<br>
 	<br>
-	<input type="button" class="button button-big" name="copyOutput" value="copy snippet" onclick="copySnippet();">
-	<textarea id="snippet" rows="4"  placeholder="" readonly=""></textarea>
 	<br>
 
 
