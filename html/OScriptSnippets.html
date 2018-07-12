@@ -56,6 +56,14 @@
 			document.body.appendChild(el);
 			setTimeout(hideCopyInfo, 1000);
 		}
+		function downloadSnippet(snippetName) {
+			var link = document.createElement("a");
+			link.href = "../snippets/" + snippetName + ".sublime-snippet"
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			delete link;
+		}
 		function copySnippet(){
 			copyToClipboard(document.getElementById("outpuAssoc").value);
 		};
@@ -74,6 +82,7 @@
 				el.type = "button"
 				el.name = snippetName
 				el.value = "copy "+ snippetName + " snippet"
+				el.onclick = `downloadSnippet("`+ snippetName + `");`
 				el.classList.add("button");
 				el.classList.add("button-big");
 				document.body.appendChild(el);
@@ -86,7 +95,6 @@
 				el.readOnly = true
 				document.body.appendChild(el);
 				document.body.appendChild(document.createElement("BR"));
-				document.body.innerHTML += ' ';
 				//document.getElementById(snippetName).dispatchEvent( new Event('change'));
 			}
 		}
@@ -106,7 +114,6 @@
 <body>
 	<br>
 	<input type="button" class="button button-small button-left" name="back" onclick="history.back()" value="< back">
-	<br>
 	<br>
 	<br>
 
