@@ -47,7 +47,7 @@
 			document.body.appendChild(el);
 			setTimeout(hideCopyInfo, 1000);
 		}
-		function downloadSnippet(el) {
+		function downloadSnippet(snippetName) {
 			var link = document.createElement("a");
 			link.href = "../snippets/" + snippetName + ".sublime-snippet"
 			document.body.appendChild(link);
