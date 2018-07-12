@@ -1,0 +1,25 @@
+<snippet>
+	<content><![CDATA[
+public function Assoc functionName(Object prgCtx,  $1 )
+	Object		dbConnect = prgCtx.fDbConnect
+	CAPICONNECT	dbConnection= dbConnect.fConnection
+	DAPISESSION dSession = prgCtx.dSession().fSession
+	Dynamic		result
+	Assoc 		retval
+
+	retval.ok = FALSE
+	retval.errMsg = ''
+
+
+	//code
+	$2
+
+	retval.ok = TRUE;
+	return retval
+end
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>OsFunction</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.os</scope>
+</snippet>

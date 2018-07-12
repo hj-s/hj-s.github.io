@@ -1,0 +1,67 @@
+body{
+	text-align: center;
+}
+input{
+	font-family: monospace;
+	margin-bottom: 5px;
+	margin-top: 5px;
+}
+label{
+	font-family: monospace;
+}
+textarea{
+	vertical-align: top;
+	overflow: auto;
+	width: 48%;
+}
+textarea:-moz-read-only{
+	background-color: #dddddd;
+}
+textarea:read-only{
+	background-color: #dddddd;
+}
+.copyText{
+	font-family: monospace;
+}
+.button{
+	-webkit-transition-duration: 0.4s;
+	transition-duration: 0.4s;
+	background-color: #e7e7e7; 
+	border: none;
+	color: black;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+}
+.button-big {
+	padding: 10px 24px;
+	font-size: 16px;
+}
+.button:hover {
+    background-color: #aaaaaa; 
+    color: white;
+}
+.button-small{
+	padding: 5px 10px;
+	font-size: 12px;
+}
+.button:active {
+  transform: translateY(4px);
+}
+.button-left{
+	text-align: left;
+	float: left;
+	margin-right: -42px;
+}
+.copyMessage{
+	position: fixed;
+	background-color: #e7e7e7; 
+	border: none;
+	color: black;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	top: 5px;
+	right: 5px;
+	font-family: monospace;
+}

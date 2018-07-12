@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>OScript snippets</title>
+
+	<link rel="import" href="../snippets/OScritpFunction.sublime-snippet">
+	<link rel="stylesheet" href="../css/OScriptSnippets.css">
+
+	<script>
+		function domReady(f){ 
+			if (document.readyState === "complete"){
+				f();
+			}else{
+				setTimeout(domReady,16,f);
+			}
+		}
+		function resize(event){
+			event.target.style.height = 'auto';
+			event.target.style.height = event.target.scrollHeight + 20 +'px';
+		}
+		function delayedResize(event){
+			window.setTimeout(resize, 0, event);
+		}
+		function addResizeTextArea() {
+			document.querySelectorAll('textarea').forEach(function(textarea){
+				textarea.addEventListener('change',  resize, false);
+				textarea.addEventListener('cut',     delayedResize, false);
+				textarea.addEventListener('paste',   delayedResize, false);
+				textarea.addEventListener('drop',    delayedResize, false);
+				textarea.addEventListener('keydown', delayedResize, false);
+			});
+		}
+		function copyToClipboard(str){
+			const el = document.createElement('textarea');
+			el.value = str;
+			document.body.appendChild(el);
+			el.select();
+			document.execCommand('copy');
+			document.body.removeChild(el);
+			copyInfo();
+		}
+		function hideCopyInfo(){
+			document.body.removeChild(document.getElementById("infoDiv"));
+		}
+		function copyInfo(){
+			const el = document.createElement('div');
+			el.innerHTML = "output copied to clipboard";
+			el.id = "infoDiv";
+			el.classList.add("copyMessage");
+			el.classList.add("button-small");
+			document.body.appendChild(el);
+			document.body.appendChild(el);
+			setTimeout(hideCopyInfo, 1000);
+		}
+		function copySnippet(){
+			copyToClipboard(document.getElementById("outpuAssoc").value);
+		};
+		function httpGet(theUrl)
+		{
+		    if (window.XMLHttpRequest)
+		    {// code for IE7+, Firefox, Chrome, Opera, Safari
+		        xmlhttp=new XMLHttpRequest();
+		    }
+		    else
+		    {// code for IE6, IE5
+		        xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+		    }
+		    xmlhttp.onreadystatechange=function()
+		    {
+		        if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		        {
+		            return xmlhttp.responseText;
+		        }
+		    }
+		    xmlhttp.open("GET", theUrl, false );
+		    xmlhttp.send();    
+		}
+
+		//...
+		domReady(addResizeTextArea);
+	</script>
+</head>
+<body>
+	<br>
+	<input type="button" class="button button-small button-left" name="back" onclick="history.back()" value="< back">
+	<br>
+	<br>
+	<input type="button" class="button button-big" name="copyOutput" value="copy snippet" onclick="copySnippet();">
+	<textarea id="snippet" rows="4"  placeholder="" readonly=""></textarea>
+	<br>
+	<input type="button" class="button button-big" name="copyOutput" value="copy snippet" onclick="copySnippet();">
+	<textarea id="snippet" rows="4"  placeholder="" readonly=""></textarea>
+	<br>
+	<input type="button" class="button button-big" name="copyOutput" value="copy snippet" onclick="copySnippet();">
+	<textarea id="snippet" rows="4"  placeholder="" readonly=""></textarea>
+	<br>
+	<input type="button" class="button button-big" name="copyOutput" value="copy snippet" onclick="copySnippet();">
+	<textarea id="snippet" rows="4"  placeholder="" readonly=""></textarea>
+	<br>
+
+
+</body>
+</html>
+	
