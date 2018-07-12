@@ -67,10 +67,13 @@
 				let snippetName = snippet.querySelector('tabTrigger').innerHTML
 				let snippetText = snippet.querySelector('content').innerHTML.replace(/<!--\[CDATA\[\n|\]\]-->/g, "")
 
+				document.body.appendChild(document.createElement("BR"));
+				document.body.innerHTML += ' ';
+
 				let el = document.createElement('input')
 				el.type = "button"
 				el.name = snippetName
-				el.value = "copy snippet"
+				el.value = "copy "+ snippetName + " snippet"
 				el.classList.add("button");
 				el.classList.add("button-big");
 				document.body.appendChild(el);
@@ -83,13 +86,20 @@
 				el.readOnly = true
 				document.body.appendChild(el);
 				document.body.appendChild(document.createElement("BR"));
+				document.body.innerHTML += ' ';
 				//document.getElementById(snippetName).dispatchEvent( new Event('change'));
 			}
+		}
+		function resizeSnippets(){
+			document.querySelectorAll('textarea').forEach(function(textarea){
+				textarea.dispatchEvent( new Event('change'));
+			});
 		}
 
 		//...
 		domReady(importSnippets);
 		domReady(addResizeTextArea);
+		domReady(resizeSnippets);
 
 	</script>
 </head>
