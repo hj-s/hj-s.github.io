@@ -70,18 +70,20 @@
 				let el = document.createElement('input')
 				el.type = "button"
 				el.name = snippetName
+				el.id = snippetName
 				el.value = "copy "+ snippetName + " snippet"
 				//el.onclick = function (){ downloadSnippet(snippetName) }
 				el.addEventListener("click", function (){ downloadSnippet(snippetName) })
 				el.classList.add("button");
 				el.classList.add("button-big");
 				document.body.appendChild(el);
+				document.getElementById(snippetName).addEventListener("click", function (){ downloadSnippet(snippetName) })
 				
 				document.body.innerHTML += ' ';
 
 				el = document.createElement('textarea')
 				el.innerHTML = snippetText
-				el.id = snippetName
+				//el.id = snippetName
 				el.readOnly = true
 				document.body.appendChild(el);
 				document.body.appendChild(document.createElement("BR"));
