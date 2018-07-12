@@ -71,7 +71,8 @@
 				el.type = "button"
 				el.name = snippetName
 				el.value = "copy "+ snippetName + " snippet"
-				el.onclick = function (){ downloadSnippet(snippetName) }
+				//el.onclick = function (){ downloadSnippet(snippetName) }
+				el.addEventListener("click", function (){ downloadSnippet(snippetName) })
 				el.classList.add("button");
 				el.classList.add("button-big");
 				document.body.appendChild(el);
