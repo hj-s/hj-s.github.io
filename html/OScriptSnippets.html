@@ -72,20 +72,19 @@
 				el.name = snippetName
 				el.id = snippetName
 				el.value = "copy "+ snippetName + " snippet"
-				el.onclick = function (){ downloadSnippet(snippetName) }
-				el.addEventListener("click", function (){ downloadSnippet(snippetName) })
+				//el.onclick = function (){ downloadSnippet(snippetName) }
+				//el.addEventListener("click", function (){ downloadSnippet(snippetName) })
 				el.classList.add("button");
 				el.classList.add("button-big");
 				document.body.appendChild(el);
-				el.onclick = function (){ downloadSnippet(snippetName) }
-				document.getElementById(snippetName).addEventListener("click", function (){ downloadSnippet(snippetName) })
+				//el.onclick = function (){ downloadSnippet(snippetName) }
+				//document.getElementById(snippetName).addEventListener("click", function (){ downloadSnippet(snippetName) })
 				
 				document.body.innerHTML += ' ';
 
 				el = undefined
 				el = document.createElement('textarea')
 				el.innerHTML = snippetText
-				//el.id = snippetName
 				el.readOnly = true
 				document.body.appendChild(el);
 				document.body.appendChild(document.createElement("BR"));
@@ -96,11 +95,19 @@
 				textarea.dispatchEvent( new Event('change'));
 			});
 		}
+		function addSnippetsEvent(){
+			var snippetLength = document.querySelectorAll(".button-big").length
+			for (let i = 0; i < snippetLength; i++){
+				document.querySelectorAll("input")[i].onclick = function(){downloadSnippet(document.querySelectorAll("input")[i].id)}
+			}
+
+		}
 
 		//...
 		domReady(importSnippets);
 		domReady(addResizeTextArea);
 		domReady(resizeSnippets);
+		domReady(addSnippetsEvent);
 
 	</script>
 </head>
