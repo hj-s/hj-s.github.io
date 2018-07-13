@@ -72,13 +72,9 @@
 				el.name = snippetName
 				el.id = snippetName
 				el.value = "copy "+ snippetName + " snippet"
-				//el.onclick = function (){ downloadSnippet(snippetName) }
-				//el.addEventListener("click", function (){ downloadSnippet(snippetName) })
 				el.classList.add("button");
 				el.classList.add("button-big");
 				document.body.appendChild(el);
-				//el.onclick = function (){ downloadSnippet(snippetName) }
-				//document.getElementById(snippetName).addEventListener("click", function (){ downloadSnippet(snippetName) })
 				
 				document.body.innerHTML += ' ';
 
@@ -98,7 +94,7 @@
 		function addSnippetsEvent(){
 			var snippetLength = document.querySelectorAll(".button-big").length
 			for (let i = 0; i < snippetLength; i++){
-				document.querySelectorAll("input")[i].onclick = function(){downloadSnippet(document.querySelectorAll("input")[i].id)}
+				document.querySelectorAll(".button-big")[i].onclick = function(){downloadSnippet(document.querySelectorAll("input")[i].id)}
 			}
 
 		}
