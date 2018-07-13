@@ -94,7 +94,7 @@
 		function addSnippetsEvent(){
 			var snippetLength = document.querySelectorAll(".button-big").length
 			for (let i = 0; i < snippetLength; i++){
-				document.querySelectorAll(".button-big")[i].onclick = function(){downloadSnippet(document.querySelectorAll("input")[i].id)}
+				document.querySelectorAll(".button-big")[i].onclick = function(){downloadSnippet(document.querySelectorAll(".button-big")[i].id)}
 			}
 
 		}
