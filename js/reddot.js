@@ -1,26 +1,36 @@
 //arrow functions
 const isDefined = (check) => (check !== undefined);
 
-//const or start data
-var cwidth = 640
-var cheight = 480
+//variables for canvas && square diameter
+var sqfX = 30
+var sqfY = 20
 var sqfd = 20
 
+var cwidth = sqfX*sqfd
+var cheight = sqfY*sqfd
+
+
+//start pos for reddot
 var startX = 0
 var startY = 0
 
+//const for random place borders 
 const rPlace = 0.3
 const dPlace = 0.7
 
+
+//global variables for objects
 var maze = undefined
 var reddot = undefined
 var exit = undefined
 var path = undefined
 
+//variables for draw some stuff
 var drawFOV = true
 var drawExitC = true
 var drawPath = true
 
+//ns
 var debug = true
 
 //int
@@ -72,17 +82,20 @@ function startMaze(){
 	//create new field
 	maze = new SqfField(cwidth/sqfd, cheight/sqfd)
 	//create maze using method
-	maze.createMaze('eller')
+	maze.createMaze(`eller`)
 	//create point
-	reddot = new Point(startX, startY)
-	//create exit
-	exit = createExit()
+	//reddot = new Point(startX, startY)
+	reddot = generatePoint()
+	startX = reddot.X
+	startY = reddot.Y
 	//clear path
 	path = undefined
+	addPointToPath()
+	//create exit
+	exit = createExit()
 
 	//clear all before start new
 	clearCanvas()
-	
 	//draw field of view
 	if (isDefined(reddot) && drawFOV){
 		drawGradient()
@@ -104,22 +117,31 @@ function startMaze(){
 //create exit
 function createExit() {
 	if (isDefined(maze)){
-		//set wall
-		let walls = [`up`,`right`,`down`,`left`]
-		//choose wall
-		let randomItem = walls[Math.floor(Math.random()*walls.length)];
-		//shose position on the wall
-		if (randomItem == `up`){
-			return new Point(Math.floor(Math.random()*cwidth/sqfd), 0)
-		}else if (randomItem == `right`) {
-			return new Point(cwidth/sqfd - 1, Math.floor(Math.random()*cheight/sqfd))
-		}else if (randomItem == `down`) {
-			return new Point(Math.floor(Math.random()*cwidth/sqfd), cheight/sqfd - 1)
-		}else if (randomItem ==`left` ) {
-			return new Point(0 ,Math.floor(Math.random()*cheight/sqfd))
+		let cexit = generatePoint()
+		if (isDefined(reddot)){
+			return (cexit.is(reddot) ? createExit() : cexit )
 		}else {
-			return undefined
-		}
+			return cexit
+		} 
+	}
+}
+//generate random point on the wall
+function generatePoint(){
+	let walls = [`up`,`right`,`down`,`left`]
+	//choose wall
+	let randomItem = walls[Math.floor(Math.random()*walls.length)];
+	//shose position on the wall
+	if (randomItem == `up`){
+		return new Point(Math.floor(Math.random()*cwidth/sqfd), 0)
+	}else if (randomItem == `right`) {
+		return new Point(cwidth/sqfd - 1, Math.floor(Math.random()*cheight/sqfd))
+	}else if (randomItem == `down`) {
+		return new Point(Math.floor(Math.random()*cwidth/sqfd), cheight/sqfd - 1)
+	}else if (randomItem ==`left` ) {
+		return new Point(0 ,Math.floor(Math.random()*cheight/sqfd))
+	}else {
+		console.log(`unknown wall`)
+		return undefined
 	}
 }
 //handle pathCb
@@ -228,6 +250,7 @@ function addPointToPath(){
 }
 
 //functions to draw stuff
+//get canvas context to draw
 function getCtx(){
 	let canvas = document.getElementById(`field`)
 	if (isDefined(canvas)){
@@ -243,11 +266,13 @@ function getCtx(){
 		console.log(`canvas is not defined`)
 	}
 }
+//clear canvas for new draw
 function clearCanvas(){
 	let ctx = getCtx()
 	if (isDefined(ctx)){
 		let canvas = document.getElementById(`field`)
-		ctx.clearRect(0, 0, canvas.width, canvas.height)
+		//some odd way to clear canvas
+		ctx.clearRect(0, 0, canvas.width, canvas.height) 
 		ctx.save()
 	}else {
 		console.log(`ctx is not defined`)
@@ -257,6 +282,7 @@ function clearCanvas(){
 function draw(){
 	//clear canvas
 	clearCanvas()
+	//draw gradient
 	if (isDefined(reddot) && drawFOV){
 		drawGradient()
 	}
@@ -281,7 +307,7 @@ function drawPathLine(){
 	if (isDefined(ctx)){
 		if (isDefined(path) && drawPath){
 			ctx.beginPath()
-			ctx.strokeStyle = "purple"
+			ctx.strokeStyle = `purple`
 			ctx.moveTo(startX + sqfd/2, startY + sqfd/2)
 			for( let i = 0; i < path.length; i++){ //add line to path view
 				ctx.lineTo(path[i].x*sqfd + sqfd/2, path[i].y*sqfd + sqfd/2)	
@@ -298,7 +324,7 @@ function drawExit(){
 		let ctx = getCtx()
 		if (isDefined(ctx)){
 			ctx.beginPath()
-			ctx.strokeStyle = "red"
+			ctx.strokeStyle = `red`
 			ctx.strokeRect(exit.x*sqfd + sqfd/4, exit.y*sqfd + sqfd/4 ,sqfd/2,sqfd/2); 
 			ctx.save()
 		}else {
@@ -312,12 +338,29 @@ function drawGradient(){
 	if (isDefined(reddot)){
 		let ctx = getCtx()
 		if (isDefined(ctx))	{
+			// ctx.beginPath() // centerx inner, centery inner, radius inner, centerx outer, centery outer, radius outer
+			// let gradient = ctx.createRadialGradient(sqfd*reddot.x + sqfd/2, sqfd*reddot.y + sqfd/2, 50, sqfd*reddot.x + sqfd/2, sqfd*reddot.y + sqfd/2, 100)
+			// gradient.addColorStop(0, `white`) //from
+			// gradient.addColorStop(1, `black`) //to
+			// ctx.fillStyle = gradient
+			// ctx.fillRect(0, 0, cwidth, cheight);
 			ctx.beginPath() // centerx inner, centery inner, radius inner, centerx outer, centery outer, radius outer
-			let gradient = ctx.createRadialGradient(sqfd*reddot.x + sqfd/2, sqfd*reddot.y + sqfd/2, 50, sqfd*reddot.x + sqfd/2, sqfd*reddot.y + sqfd/2, 100)
-			gradient.addColorStop(0, 'white') //from
-			gradient.addColorStop(1, 'black') //to
+			let gradient = undefined
+			gradient = ctx.createRadialGradient(sqfd*reddot.x + sqfd/2, sqfd*reddot.y + sqfd/2, 50, sqfd*reddot.x + sqfd/2, sqfd*reddot.y + sqfd/2, 200)
+			gradient.addColorStop(0, `white`) //from
+			gradient.addColorStop(1, `black`) //to
 			ctx.fillStyle = gradient
+			ctx.globalAlpha = 1
 			ctx.fillRect(0, 0, cwidth, cheight);
+
+			gradient = ctx.createRadialGradient(sqfd*reddot.x + sqfd/2, sqfd*reddot.y + sqfd/2,  (sqfd-5)/2, sqfd*reddot.x + sqfd/2, sqfd*reddot.y + sqfd/2, 100)
+			gradient.addColorStop(0, `white`) //from
+			gradient.addColorStop(1, `black`) //to
+			ctx.fillStyle = gradient
+			ctx.globalAlpha = 0.8
+			ctx.fillRect(0, 0, cwidth, cheight);
+
+			ctx.globalAlpha = 1
 			ctx.save()
 		}else {
 			console.log(`ctx is not defined`)
@@ -329,12 +372,14 @@ function drawGradient(){
 function drawMaze(){
 	if (isDefined(maze)){
 		let ctx = getCtx()
-		ctx.strokeStyle = "black"
+		ctx.strokeStyle = `black`
 		if (isDefined(ctx)){
 			let lstartX = 0;
 			let lstartY = 0;
 			for (let i = 0; i < maze.height; i++){
 				for (let j = 0; j < maze.width; j++){
+					//we can remove some draws of lines due to i's right = i+1's left
+					//someday...
 					if (maze.field[i][j].up){
 						drawLine(lstartX, lstartY, lstartX + sqfd, lstartY)
 					}
@@ -347,6 +392,10 @@ function drawMaze(){
 					if (maze.field[i][j].left){
 						drawLine(lstartX, lstartY, lstartX, lstartY + sqfd)
 					}
+					//show index for debug
+					if (debug && false){
+						drawText(lstartX + sqfd/8 , lstartY + sqfd/2, maze.field[i][j].index)
+					}
 					lstartX += sqfd
 				}
 				lstartX = 0
@@ -358,6 +407,18 @@ function drawMaze(){
 		}
 	}else {
 		console.log(`maze is not defined`)
+	}
+}
+function drawText(lstartX, lstartY, text){
+	let ctx = getCtx()
+	if (isDefined(ctx)){
+		ctx.beginPath()
+		ctx.font = `6px`;
+		ctx.fillStyle = `black`
+		ctx.fillText(text, lstartX, lstartY); 
+		ctx.save()
+	}else {
+		console.log(`ctx is not defined`)
 	}
 }
 function drawLine(lstartX, lstartY, endX, endY){
@@ -385,7 +446,7 @@ function drawCircle(centerX, centerY, radius, reddot = false){
 		ctx.beginPath()
 		ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI)
 		if (reddot) { 
-			ctx.fillStyle = "red" 
+			ctx.fillStyle = `red` 
 			ctx.fill()
 		} else{
 			ctx.stroke()
@@ -479,19 +540,17 @@ class SqfField {
 		for (let i = 0; i < this.height; i++) {
 			if (i != this.height - 1){ //not last line
 				//set right
-				for (let j = 0; j < this.width; j++) {
+				for (let j = 0; j < this.width - 1; j++) {
 					//place right
-					if (j != this.width-1){
-						if (this.field[i][j].index == this.field[i][j+1].index){
+					if (this.field[i][j].index == this.field[i][j+1].index){
+						this.field[i][j].right = true //place right to this box
+						this.field[i][j+1].left = true //and to right for easy check of path
+					}else{
+						if (Math.random() < rPlace) { 
 							this.field[i][j].right = true //place right to this box
 							this.field[i][j+1].left = true //and to right for easy check of path
-						}else{
-							if (Math.random() < rPlace) { 
-								this.field[i][j].right = true //place right to this box
-								this.field[i][j+1].left = true //and to right for easy check of path
-							}else {
-								this.field[i][j+1].index = this.field[i][j].index
-							}
+						}else {
+							this.field[i][j+1].index = this.field[i][j].index
 						}
 					}
 				}
@@ -532,9 +591,6 @@ class SqfField {
 				for (let j = 0; j < this.width; j++) {
 					if (line[j].right) {
 						line[j].right = false
-						if (j != this.width){
-							line[j+1].left = false
-						}
 					}
 					if (line[j].left){
 						line[j].left = false
@@ -548,6 +604,19 @@ class SqfField {
 						line[j].down = false
 						//match downs and ups
 						line[j].up = true
+						//test discard loops
+						// if (debug){
+						// 	if (j != 0 && j != line.length-1){
+						// 		if (line[j-1].index != line[j].index) {
+						// 			line[j-1].right = true
+						// 			line[j].left = true
+						// 		}
+						// 		if (line[j+1].index != line[j].index) {
+						// 			line[j+1].left = true
+						// 			line[j].right = true
+						// 		}
+						// 	}
+						// }
 					}
 				}
 				//place nextline
@@ -567,3 +636,18 @@ class SqfField {
 		}
 	}
 }
+
+/*
+	 ___ ___ ___ ___ ___ ___ ___ ___
+	|    ___ ___|    ___|        ___|
+	| 1 | 2  _2_ _2_| 5 | 6 | 6  _6_|
+	| 1   2   7   8   5   6 |_6_  6 |
+	| 1   1   1   1   1   1   1   1 |
+	 ___ ___ ___ ___ ___ ___ ___ ___
+	| 1  _1_ _1_| 4  _4_| 6  _6_  6 |
+	| 1 | 2   2 | 4   4 | 6   6   6 |
+
+	 ___ ___ ___ ___ ___ ___ ___ ___
+	|    ___    |    ___|        ___| 
+	| 1   1   1 | 4   5   6   6   7 |
+*/
