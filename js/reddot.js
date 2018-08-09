@@ -134,11 +134,15 @@ var speed = 1
 		if (isDefined(maze)){
 			maze.renderFovEnhArr(globalContext.getCtx(canvasID))
 		}
+		if (isDefined(Global.evil)){
+			Global.handleMove(Global.evil)
+			//global.evil.move()
+			Global.evil.render(globalContext.getCtx(canvasID))
+		}
 		//draw fov
 		if (isDefined(reddot) && drawFOVi){
 			reddot.renderFov(globalContext.getCtx(canvasID))
 		}
-
 		canvasID = topCanvas
 
 		globalContext.clearCtx(canvasID)
@@ -150,10 +154,7 @@ var speed = 1
 		if (isDefined(reddot)){
 			reddot.render(globalContext.getCtx(canvasID))
 		}
-		// if (isDefined(global.evil)){
-		// 	//global.evil.move()
-		// 	global.evil.render(globalContext.getCtx(canvasID))
-		// }
+		
 	}
 	function draw3(canvasID){
 		globalContext.clearCtx(canvasID)
@@ -254,31 +255,37 @@ var speed = 1
 		}
 		static createEvli(){
 			if (isDefined(maze)){
-				this.evil = maze.generatePoint(`exit`)
+				this.evil = (new Evil()).copyFrom(maze.generatePoint())
 
-				//ai for evil
-				this.evil.move = function(){
-					if (!maze.checkWall(Global.evil.x, Global.evil.y, Global.evil.x + 1, Global.evil.y)){
-						Global.evil.x++
-					}else if (!maze.checkWall(Global.evil.x, Global.evil.y, Global.evil.x - 1, Global.evil.y)) {
-						Global.evil.x--
-					}
-				}	
-
+				// //ai for evil
+				// this.evil.move = function(){
+				// 	if (!maze.checkWall(Global.evil.x, Global.evil.y, Global.evil.x + 1, Global.evil.y)){
+				// 		Global.evil.x++
+				// 	}else if (!maze.checkWall(Global.evil.x, Global.evil.y, Global.evil.x - 1, Global.evil.y)) {
+				// 		Global.evil.x--
+				// 	}
+				// }	
 			}
 		}
 		static handleMove(point, up, right, down, left){
 			if (isDefined(point) && isDefined(maze)){
-				let move = false
+				let finishMove = false
+				let startMove = false
+				let continueMove = false
 				if (point.gmoveU || point.gmoveR || point.gmoveD || point.gmoveL){
-					move = point.handleContinueMove()
+					finishMove = point.handleContinueMove()
+					continueMove = !finishMove
 				}else{
-					point.handleStartMove( up, right, down, left)
+					startMove = point.handleStartMove( up, right, down, left)
 				}
-				if (move){
+				if (finishMove){
 					point.handleFinishMove()
 					point.moveCallback()
 				}
+				if (!startMove && !continueMove && !finishMove){
+					point.handleWrongMove()
+				}
+
 			}
 
 		}
@@ -426,6 +433,9 @@ var speed = 1
 					this.gmoveL = true
 				}
 			}
+
+			return this.gmoveU || this.gmoveR || this.gmoveD || this.gmoveL
+
 		}
 		handleContinueMove(){
 			let move = false
@@ -520,58 +530,41 @@ var speed = 1
 		handleFinishMove(){
 			if(this.moveU && this.moveR){
 				this.y -= 1
-				this.moveU = false
-				this.gmoveU = false
-
 				this.x += 1
-				this.moveR = false	
-				this.gmoveR = false
 			}else if (this.moveR && this.moveD) {
 				this.x += 1
-				this.moveR = false	
-				this.gmoveR = false
-
 				this.y +=1
-				this.moveD = false
-				this.gmoveD = false
-				
 			}else if (this.moveD && this.moveL) {
 				this.y +=1
-				this.moveD = false
-				this.gmoveD = false
-
 				this.x -= 1
-				this.moveL = false
-				this.gmoveL = false
-				
 			}else if (this.moveL && this.moveU) {
 				this.x -= 1
-				this.moveL = false
-				this.gmoveL = false
-
 				this.y -= 1
-				this.moveU = false
-				this.gmoveU = false
-				
 			}else if (this.moveU) {
 				this.y -= 1
-				this.moveU = false
-				this.gmoveU = false
-				
 			}else if (this.moveR) {
 				this.x += 1
-				this.moveR = false	
-				this.gmoveR = false
 			}else if (this.moveD) {
 				this.y +=1
-				this.moveD = false
-				this.gmoveD = false
-				
 			}else if (this.moveL) {
 				this.x -= 1
-				this.moveL = false
-				this.gmoveL = false
 			}
+		}
+		handleWrongMove(){
+
+		}
+		clearMove(){
+			this.moveU = false
+			this.gmoveU = false
+
+			this.moveR = false	
+			this.gmoveR = false
+			
+			this.moveD = false
+			this.gmoveD = false
+
+			this.moveL = false
+			this.gmoveL = false
 		}
 	}
 	class Reddot extends Point {
@@ -582,6 +575,7 @@ var speed = 1
 			ctx.fill()
 		}
 		moveCallback(){
+			this.clearMove()
 			//add point to path
 			if (isDefined(maze)){
 				maze.addPath(this)
@@ -612,6 +606,37 @@ var speed = 1
 	class FovEnh extends Point {
 		render(ctx){
 			ctx.strokeStyle = `blue`
+			ctx.globalCompositeOperation = `source-over`
+			ctx.strokeRect(this.view.x + this.d/4, this.view.y + this.d/4 , this.d/2, this.d/2)
+			ctx.closePath()
+		}
+	}
+	class Evil extends Point {
+		moveCallback(){
+			let up = this.moveU
+			let right = this.moveR
+			let down = this.moveD
+			let left = this.moveL
+
+			this.clearMove()
+
+			Global.handleMove(this, up, right, down, left)
+		}
+		handleWrongMove(){
+
+			let move = [false, true]
+			let up = move[Math.floor(Math.random()*move.length)]
+			let right = (up) ? false : move[Math.floor(Math.random()*move.length)]
+			let down = (up || right)  ? false : move[Math.floor(Math.random()*move.length)]
+			let left = (up || right || down) ? false : move[Math.floor(Math.random()*move.length)]
+
+
+			//setTimeout(
+				Global.handleMove(this, up, right, down, left)//, 3000
+				//)
+		}
+		render(ctx){
+			ctx.strokeStyle = `purple`
 			ctx.globalCompositeOperation = `source-over`
 			ctx.strokeRect(this.view.x + this.d/4, this.view.y + this.d/4 , this.d/2, this.d/2)
 			ctx.closePath()
