@@ -62,7 +62,7 @@
 			for (let i = 0; i < snippetLength; i++){
 				let snippet = document.querySelectorAll('link[rel="import"]')[i].import
 				let snippetName = snippet.querySelector('tabTrigger').innerHTML
-				let snippetText = snippet.querySelector('content').innerHTML.replace(/<!--\[CDATA\[\n|\]\]>/g, "")
+				let snippetText = snippet.querySelector('content').innerHTML.replace(/<!--\[CDATA\[\n|\]\]-->|\]\]>/g, "")
 
 				document.body.appendChild(document.createElement("BR"));
 				document.body.innerHTML += ' ';
