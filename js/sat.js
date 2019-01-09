@@ -34,7 +34,8 @@ function handleSpacebar(id){
 	if ( Global.spacebar && !Global.bulletTimer ){
 		Global.spacebar = false
 
-		if ( ( Global.upM && Global.downM ) || ( Global.rightM && Global.leftM ) || ( !Global.upM && !Global.downM && !Global.rightM && !Global.leftM) ){
+		if ( ( Global.upM && Global.downM ) || ( Global.rightM && Global.leftM ) || 
+			( !Global.upM && !Global.downM && !Global.rightM && !Global.leftM && !Global.point.upML && !Global.point.downML && !Global.point.rightML && !Global.point.leftML  ) ){
 			return false
 		}
 		let bullet = undefined
@@ -43,10 +44,10 @@ function handleSpacebar(id){
 		}else{
 			bullet = new BulletPoint(Global.startPointX, Global.startPointY)
 		}
-		bullet.upM = Global.upM
-		bullet.downM = Global.downM 
-		bullet.rightM = Global.rightM
-		bullet.leftM = Global.leftM 
+		bullet.upM = Global.upM || Global.point.upML
+		bullet.downM = Global.downM || Global.point.downML
+		bullet.rightM = Global.rightM || Global.point.rightML
+		bullet.leftM = Global.leftM || Global.point.leftML
 		bullet.fired = true
 		Global.bullet.push(bullet)
 		bullet.render(ctx)
@@ -69,7 +70,6 @@ function handleBullets(id){
 			}
 		}
 	}
-	Global.bullet = Global.bullet.filter(x => x)
 }
 function createBulletFraction(id, point){
 	let ctx = Global.ctx.getCtx(id)
@@ -263,10 +263,16 @@ function handlePoint(id){
 			let innerWidth = 640
 			let innerHeight = 480
 
-			Global.startPointX = innerWidth/2
-			Global.startPointY = innerHeight/2
+			let pageWidth = document.documentElement.clientWidth
+			let pageHeight = document.documentElement.clientHeight
 
-			Global.ctx = new ContextHandler(innerWidth, innerHeight, Global.mainCanvas)
+			Global.widthD = pageWidth/innerWidth
+			Global.heightD = pageHeight/innerHeight
+
+			Global.startPointX = pageWidth/2
+			Global.startPointY = pageHeight/2
+
+			Global.ctx = new ContextHandler(pageWidth, pageHeight, Global.mainCanvas)
 
 			Global.initPoint()
 
@@ -326,7 +332,7 @@ function handlePoint(id){
 			}
 		}
 		static initPoint(){
-			Global.point = new Point(Global.startPointX, Global.startPointY)	
+			Global.point = new UserPoint(Global.startPointX, Global.startPointY)	
 		}
 	}
 	class ContextHandler {
@@ -394,7 +400,9 @@ function handlePoint(id){
 			this.downM = false
 			this.rightM = false
 			this.leftM = false
-			this.speed = 1
+			this.speed = 1 * Global.widthD
+			this.width = 6 * Global.widthD
+			this.height = 6 * Global.widthD
 		}
 		move(){
 
@@ -438,9 +446,65 @@ function handlePoint(id){
 		}
 		render(ctx){
 			ctx.fillStyle = `black` 
-			ctx.fillRect(this.x - 2, this.y - 2, 4, 4);
+			ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
 			ctx.closePath()
 			ctx.fill()
+		}
+	}
+
+	class UserPoint extends Point{
+		constructor(x = 0, y = 0){
+			super(x,y)
+			this.upML = false
+			this.downML = false
+			this.rightML = false
+			this.leftML = false
+		}
+		checkMove(){
+			let newX = this.x
+			let newY = this.y
+			let deltaX = 0
+			let deltaY = 0
+			if ( Global.upM && !Global.downM ){
+				deltaY -= this.speed
+				this.upML = true
+				this.downML = false
+				this.rightML = false
+				this.leftML = false
+			}
+			if ( Global.downM && !Global.upM ){
+				deltaY += this.speed
+				this.upML = false
+				this.downML = true
+				this.rightML = false
+				this.leftML = false
+			}
+			if ( Global.rightM && !Global.leftM ){
+				deltaX += this.speed
+				this.upML = false
+				this.downML = false
+				this.rightML = true
+				this.leftML = false
+			}
+			if ( Global.leftM && !Global.rightM ){
+				deltaX -= this.speed
+				this.upML = false
+				this.downML = false
+				this.rightML = false
+				this.leftML = true
+			}
+			if ( deltaY != 0 && deltaX != 0 ){
+				deltaX = deltaX/Math.abs(deltaX) * this.speed * ( 1/Math.sqrt(2) ) 
+				deltaY = deltaY/Math.abs(deltaY) * this.speed * ( 1/Math.sqrt(2) ) 
+				this.upML = false
+				this.downML = false
+				this.rightML = false
+				this.leftML = false
+			}
+			newX += deltaX
+			newY += deltaY
+
+			return new Point(newX, newY)
 		}
 	}
 
@@ -448,11 +512,13 @@ function handlePoint(id){
 		constructor(x = 0, y = 0){
 			super(x ,y)
 			this.fired = false
-			this.speed = 6
+			this.speed = 6 * Global.widthD 
+			this.width = 4 * Global.widthD 
+			this.height = 4 * Global.widthD 
 		}
 		render(ctx){
 			ctx.fillStyle = `red` 
-			ctx.fillRect(this.x - 2, this.y - 2, 4, 4);
+			ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
 			ctx.closePath()
 			ctx.fill()
 		}
@@ -488,11 +554,13 @@ function handlePoint(id){
 			super(x, y)
 			this.fired = true
 			this.life = 14
-			this.speed = 2
+			this.speed = 2 * Global.widthD 
+			this.width=  2 * Global.widthD 
+			this.height = 2 * Global.widthD 
 		}
 		render(ctx){
 			ctx.fillStyle = `red` 
-			ctx.fillRect(this.x - 1, this.y - 1, 2, 2);
+			ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
 			ctx.closePath()
 			ctx.fill()
 		}
