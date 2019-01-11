@@ -28,6 +28,8 @@ function draw(){
 	handleBullets(Global.mainCanvas)
 	handleBulletFractions(Global.mainCanvas)
 	handleTargets(Global.mainCanvas)
+
+	Global.renderCounters(Global.mainCanvas)
 }
 
 function handleSpacebar(id){
@@ -51,6 +53,7 @@ function handleSpacebar(id){
 			bullet.render(ctx)
 			Global.bullet.push(bullet)
 			Global.bulletTimer = setTimeout(Global.resetBulletTimer, 100)
+			Global.countHits++
 		}
 	}
 }
@@ -111,6 +114,9 @@ function handleTargets(id){
 			Global.bulletTimer = undefined
 			Global.fractions = []
 			Global.targets = []
+			Global.countTargets = 0
+			Global.countTargetsHits = 0
+			Global.countHits = 0
 
 			Global.mainCanvas = 'sfield'
 
@@ -229,7 +235,19 @@ function handleTargets(id){
 				if (targetPoint){
 					target.moveToPoint(targetPoint)
 					Global.targets.push(target)
+					Global.countTargets++
 				}
+			}
+		}
+		static renderCounters(id){
+			let ctx = Global.ctx.getCtx(id)
+			if ( ctx ){
+				let size = 20 * Global.widthD
+				ctx.font = `${size}px calibri`;
+				ctx.strokeStyle = `red`
+				let text = ` ${Global.countTargetsHits} / ${Global.countTargets} / ${Global.countHits} `
+  				ctx.strokeText(text, 20*Global.widthD, 50*Global.widthD)
+  				ctx.closePath()
 			}
 		}
 	}
@@ -539,6 +557,7 @@ function handleTargets(id){
 				let target = this.checkTargetBorder(nextPoint)
 				if ( target ){
 					this.createBulletFraction(id, target)
+					Global.countTargetsHits++
 				 	return false
 				}
 				this.render(ctx)
