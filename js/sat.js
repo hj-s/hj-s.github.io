@@ -78,21 +78,9 @@ function handleBulletFractions(id){
 	Global.fractions = Global.fractions.filter(x => x)
 }
 function handlePoint(id){
-	let ctx = Global.ctx.getCtx(id)
 
 	if ( Global.point ){
-		let nextMove = Global.point.checkMove()
-		if ( nextMove.x >= ctx.canvas.width - 1 || nextMove.x <= 1 || nextMove.y >= ctx.canvas.height - 1 || nextMove.y <= 1 ){
-			Global.point.render(ctx)
-		} else {
-			let checkTargets = Global.point.checkTargetBorder(nextMove)
-			if ( checkTargets ){
-				console.log('collision with target')
-			}else{
-				Global.point.moveToPoint(nextMove)
-			}
-			Global.point.render(ctx)
-		}
+		Global.point.handleMovement(id)
 	}
 }
 function handleTargets(id){
@@ -410,6 +398,22 @@ function handleTargets(id){
 				}
 			}
 			return false
+		}
+		handleMovement(id){
+			let ctx = Global.ctx.getCtx(id)
+			let nextMove = this.checkMove()
+			if ( nextMove.x >= ctx.canvas.width - 1 || nextMove.x <= 1 || nextMove.y >= ctx.canvas.height - 1 || nextMove.y <= 1 ){
+				this.render(ctx)
+			} else {
+				let checkTargets = this.checkTargetBorder(nextMove)
+				if ( checkTargets ){
+					console.log('collision with target')
+					Global.initglobal()
+				}else{
+					this.moveToPoint(nextMove)
+				}
+				this.render(ctx)
+			}
 		}
 	}
 	class Target extends Point{
