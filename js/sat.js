@@ -27,6 +27,7 @@ function draw(){
 	handlePoint(Global.mainCanvas)
 	handleBullets(Global.mainCanvas)
 	handleBulletFractions(Global.mainCanvas)
+	handleTargets(Global.mainCanvas)
 }
 
 function handleSpacebar(id){
@@ -89,7 +90,18 @@ function handlePoint(id){
 		}
 	}
 }
+function handleTargets(id){
+	let ctx = Global.ctx.getCtx(id)
 
+	if ( Global.targets && Global.targets.length ){
+		for (let i = 0; i < Global.targets.length; i++ ){
+			if ( Global.targets[i] ){
+				Global.targets[i].render(ctx)
+			}
+		}
+	}
+	Global.targets = Global.targets.filter(x => x)
+}
 //class {
 	class Global {
 		constructor(){}
@@ -105,6 +117,7 @@ function handlePoint(id){
 			Global.bullet = []
 			Global.bulletTimer = undefined
 			Global.fractions = []
+			Global.targets = []
 
 			Global.mainCanvas = 'sfield'
 
@@ -112,7 +125,9 @@ function handlePoint(id){
 			let innerHeight = 480
 
 			let pageWidth = document.documentElement.clientWidth
+			Global.pageWidth = pageWidth
 			let pageHeight = document.documentElement.clientHeight
+			Global.pageHeight = pageHeight
 
 			Global.widthD = pageWidth/innerWidth
 			Global.heightD = pageHeight/innerHeight
@@ -123,6 +138,7 @@ function handlePoint(id){
 			Global.ctx = new ContextHandler(pageWidth, pageHeight, Global.mainCanvas)
 
 			Global.initPoint()
+			Global.createTargets()
 
 		}
 		static initListeners(){
@@ -186,6 +202,13 @@ function handlePoint(id){
 			if ( Global.fractions ){
 				Global.fractions.push(fraction)
 			}
+		}
+		static createTargets(count = 1){
+			for (let i = 0; i < count; i++){
+				let target = new Target(Math.floor( Math.random() * this.pageWidth), Math.floor( Math.random() * this.pageHeight))
+				Global.targets.push(target)
+			}
+
 		}
 	}
 	class ContextHandler {
@@ -309,6 +332,9 @@ function handlePoint(id){
 			this.rightM = rightM
 			this.leftM = leftM
 		}
+		getPoint(){
+			return new Point(this.x, this.y)
+		}
 	}
 
 	class UserPoint extends Point{
@@ -366,7 +392,20 @@ function handlePoint(id){
 			return new Point(newX, newY)
 		}
 	}
-
+	class Target extends Point{
+		constructor(x = 0, y = 0){
+			super(x ,y)
+			this.speed = 6 * Global.widthD 
+			this.width = 10 * Global.widthD 
+			this.height = 10 * Global.widthD 
+		}
+		render(ctx){
+			ctx.fillStyle = `gray` 
+			ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
+			ctx.closePath()
+			ctx.fill()
+		}
+	}
 	class BulletPoint extends Point{
 		constructor(x = 0, y = 0){
 			super(x ,y)
@@ -411,156 +450,174 @@ function handlePoint(id){
 			let ctx = Global.ctx.getCtx(id)
 			let nextPoint = this.checkMove()
 			this.moveToPoint(nextPoint)
-			if ( !this.checkCanvasBorder(ctx, nextPoint) ){
-				this.createBulletFraction(id)
-				return false
-			}else{
-				this.render(ctx)
-				return true	
+			let border = this.checkCanvasBorder(ctx, nextPoint)
+			if ( border ){
+				this.createBulletFraction(id, border)
+			 	return false
 			}
+			let target = this.checkTargetBorder(nextPoint)
+			if ( target ){
+				this.createBulletFraction(id, target)
+			 	return false
+			}
+			this.render(ctx)
+			return true	
 		}
 		checkCanvasBorder(ctx, nextPoint){
-			if ( nextPoint.x >= ctx.canvas.width || nextPoint.x <= 0 || nextPoint.y >= ctx.canvas.height || nextPoint.y <= 0 ){
-				return false
+			if ( nextPoint.x >= ctx.canvas.width ){
+				return new Point(ctx.canvas.width-1, nextPoint.y)
+			}else if ( nextPoint.x <= 0 ) {
+				return new Point(1, nextPoint.y)
+			}else if ( nextPoint.y >= ctx.canvas.height  ) {
+				return new Point(nextPoint.x, ctx.canvas.height-1)
+			}else if ( nextPoint.y <= 0  ) {
+				return new Point(nextPoint.x, 1)
 			}else{
-				return true
+				return false
 			}	
 		}
-		createBulletFraction(id){
+		checkTargetBorder(nextPoint){
+			if ( Global.targets && Global.targets.length ){
+				for (let i = 0; i < Global.targets.length; i++ ){
+					if (( nextPoint.x >= Global.targets[i].x - Global.targets[i].width/2  && nextPoint.x <= Global.targets[i].x + Global.targets[i].width/2 ) &&
+						( nextPoint.y >= Global.targets[i].y - Global.targets[i].height/2  && nextPoint.y <= Global.targets[i].y + Global.targets[i].height/2 )
+					) {
+						let tempTarget = Global.targets[i].getPoint()
+						Global.createTargets(2)
+						Global.targets[i] = undefined
+						return tempTarget
+					}
+				}
+			}
+			return false
+		}
+		createBulletFraction(id, point){
 			let ctx = Global.ctx.getCtx(id)
 
 			let fraction = undefined
 
-			if ( this.x <= 0 ){
-				if ( !this.downM ){
-					fraction = new BulletFraction(1, this.y)
-					fraction.upM = true
-					fraction.downM = false
-					fraction.rightM = false
-					fraction.leftM = false
-					Global.pushFraction(fraction)
+			if ( !this.downM ){
+				fraction = new BulletFraction(point.x, point.y)
+				fraction.upM = true
+				fraction.downM = false
+				fraction.rightM = false
+				fraction.leftM = false
+				Global.pushFraction(fraction)
 
-					fraction = new BulletFraction(1, this.y)
-					fraction.upM = true
-					fraction.downM = false
-					fraction.rightM = true
-					fraction.leftM = false
-					Global.pushFraction(fraction)
-				}
-				if ( !this.upM ){
-					fraction = new BulletFraction(1, this.y)
-					fraction.upM = false
-					fraction.downM = true
-					fraction.rightM = false
-					fraction.leftM = false
-					Global.pushFraction(fraction)
-
-					fraction = new BulletFraction(1, this.y)
-					fraction.upM = false
-					fraction.downM = true
-					fraction.rightM = true
-					fraction.leftM = false
-					Global.pushFraction(fraction)
-				}
-
+				fraction = new BulletFraction(point.x, point.y)
+				fraction.upM = true
+				fraction.downM = false
+				fraction.rightM = true
+				fraction.leftM = false
+				Global.pushFraction(fraction)
 			}
-			if ( this.x >= ctx.canvas.width ){
-				if ( !this.downM ){
-					fraction = new BulletFraction(ctx.canvas.width - 1, this.y)
-					fraction.upM = true
-					fraction.downM = false
-					fraction.rightM = false
-					fraction.leftM = false
-					Global.pushFraction(fraction)
+			if ( !this.upM ){
+				fraction = new BulletFraction(point.x, point.y)
+				fraction.upM = false
+				fraction.downM = true
+				fraction.rightM = false
+				fraction.leftM = false
+				Global.pushFraction(fraction)
 
-					fraction = new BulletFraction(ctx.canvas.width - 1, this.y)
-					fraction.upM = true
-					fraction.downM = false
-					fraction.rightM = false
-					fraction.leftM = true
-					Global.pushFraction(fraction)
-				}
-
-				if ( !this.upM ){
-					fraction = new BulletFraction(ctx.canvas.width - 1, this.y)
-					fraction.upM = false
-					fraction.downM = true
-					fraction.rightM = false
-					fraction.leftM = false
-					Global.pushFraction(fraction)
-
-					fraction = new BulletFraction(ctx.canvas.width - 1, this.y)
-					fraction.upM = false
-					fraction.downM = true
-					fraction.rightM = false
-					fraction.leftM = true
-					Global.pushFraction(fraction)
-				}
+				fraction = new BulletFraction(point.x, point.y)
+				fraction.upM = false
+				fraction.downM = true
+				fraction.rightM = true
+				fraction.leftM = false
+				Global.pushFraction(fraction)
 			}
-			if ( this.y <= 0 ){
-				if ( !this.leftM ) {
-					fraction = new BulletFraction(this.x, 1)
-					fraction.upM = false
-					fraction.downM = false
-					fraction.rightM = true
-					fraction.leftM = false
-					Global.pushFraction(fraction)
 
-					fraction = new BulletFraction(this.x, 1)
-					fraction.upM = false
-					fraction.downM = true
-					fraction.rightM = true
-					fraction.leftM = false
-					Global.pushFraction(fraction)
-				}
-				if ( !this.rightM ){
-					fraction = new BulletFraction(this.x, 1)
-					fraction.upM = false
-					fraction.downM = false
-					fraction.rightM = false
-					fraction.leftM = true
-					Global.pushFraction(fraction)
+			if ( !this.downM ){
+				fraction = new BulletFraction(point.x, point.y)
+				fraction.upM = true
+				fraction.downM = false
+				fraction.rightM = false
+				fraction.leftM = false
+				Global.pushFraction(fraction)
 
-					fraction = new BulletFraction(this.x, 1)
-					fraction.upM = false
-					fraction.downM = true
-					fraction.rightM = false
-					fraction.leftM = true
-					Global.pushFraction(fraction)
-				}
+				fraction = new BulletFraction(point.x, point.y)
+				fraction.upM = true
+				fraction.downM = false
+				fraction.rightM = false
+				fraction.leftM = true
+				Global.pushFraction(fraction)
 			}
-			if ( this.y >= ctx.canvas.height ){
-				if ( !this.leftM ) {
-					fraction = new BulletFraction(this.x, ctx.canvas.height - 1)
-					fraction.upM = false
-					fraction.downM = false
-					fraction.rightM = true
-					fraction.leftM = false
-					Global.pushFraction(fraction)
 
-					fraction = new BulletFraction(this.x, ctx.canvas.height - 1)
-					fraction.upM = true
-					fraction.downM = false
-					fraction.rightM = true
-					fraction.leftM = false
-					Global.pushFraction(fraction)
-				}
+			if ( !this.upM ){
+				fraction = new BulletFraction(point.x, point.y)
+				fraction.upM = false
+				fraction.downM = true
+				fraction.rightM = false
+				fraction.leftM = false
+				Global.pushFraction(fraction)
 
-				if ( !this.rightM ){
-					fraction = new BulletFraction(this.x, ctx.canvas.height - 1)
-					fraction.upM = false
-					fraction.downM = false
-					fraction.rightM = false
-					fraction.leftM = true
-					Global.pushFraction(fraction)
+				fraction = new BulletFraction(point.x, point.y)
+				fraction.upM = false
+				fraction.downM = true
+				fraction.rightM = false
+				fraction.leftM = true
+				Global.pushFraction(fraction)
+			}
+			if ( !this.leftM ) {
+				fraction = new BulletFraction(point.x, point.y)
+				fraction.upM = false
+				fraction.downM = false
+				fraction.rightM = true
+				fraction.leftM = false
+				Global.pushFraction(fraction)
 
-					fraction = new BulletFraction(this.x, ctx.canvas.height - 1)
-					fraction.upM = true
-					fraction.downM = false
-					fraction.rightM = false
-					fraction.leftM = true
-					Global.pushFraction(fraction)
-				}
+				fraction = new BulletFraction(point.x, point.y)
+				fraction.upM = false
+				fraction.downM = true
+				fraction.rightM = true
+				fraction.leftM = false
+				Global.pushFraction(fraction)
+			}
+			if ( !this.rightM ){
+				fraction = new BulletFraction(point.x, point.y)
+				fraction.upM = false
+				fraction.downM = false
+				fraction.rightM = false
+				fraction.leftM = true
+				Global.pushFraction(fraction)
+
+				fraction = new BulletFraction(point.x, point.y)
+				fraction.upM = false
+				fraction.downM = true
+				fraction.rightM = false
+				fraction.leftM = true
+				Global.pushFraction(fraction)
+			}
+			if ( !this.leftM ) {
+				fraction = new BulletFraction(point.x, point.y)
+				fraction.upM = false
+				fraction.downM = false
+				fraction.rightM = true
+				fraction.leftM = false
+				Global.pushFraction(fraction)
+
+				fraction = new BulletFraction(point.x, point.y)
+				fraction.upM = true
+				fraction.downM = false
+				fraction.rightM = true
+				fraction.leftM = false
+				Global.pushFraction(fraction)
+			}
+
+			if ( !this.rightM ){
+				fraction = new BulletFraction(point.x, point.y)
+				fraction.upM = false
+				fraction.downM = false
+				fraction.rightM = false
+				fraction.leftM = true
+				Global.pushFraction(fraction)
+
+				fraction = new BulletFraction(point.x, point.y)
+				fraction.upM = true
+				fraction.downM = false
+				fraction.rightM = false
+				fraction.leftM = true
+				Global.pushFraction(fraction)
 			}
 		}
 	}
@@ -585,9 +642,10 @@ function handlePoint(id){
 		checkColisson(id){
 			let ctx = Global.ctx.getCtx(id)
 			let nextPoint = this.checkMove()
-			if ( !this.checkCanvasBorder(ctx, nextPoint) ){
+			let border =  this.checkCanvasBorder(ctx, nextPoint)
+			if ( border ){
 				return false
-			} else {
+			}else {
 				this.moveToPoint(nextPoint)
 				this.render(ctx)
 				return true
