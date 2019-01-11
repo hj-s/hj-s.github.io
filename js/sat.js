@@ -203,7 +203,7 @@ function handleTargets(id){
 			}
 		}
 		static generatePoint(){
-			let point = new Point(Math.floor( Math.random() * this.pageWidth), Math.floor( Math.random() * this.pageHeight))
+			let point = new Point(Math.floor( Math.random() * this.pageWidth), Math.floor( Math.random() * this.pageHeight ))
 			if ( Global.point ){
 				if ( point.checkCollisionWith(Global.point) ){
 					return this.generatePoint()
@@ -245,9 +245,11 @@ function handleTargets(id){
 				let size = 20 * Global.widthD
 				ctx.font = `${size}px calibri`;
 				ctx.strokeStyle = `red`
+				ctx.globalAlpha = 0.2;
 				let text = ` ${Global.countTargetsHits} / ${Global.countTargets} / ${Global.countHits} `
-  				ctx.strokeText(text, 20*Global.widthD, 50*Global.widthD)
+  				ctx.strokeText(text, 20*Global.widthD, 20*Global.widthD)
   				ctx.closePath()
+  				ctx.globalAlpha = 1;
 			}
 		}
 	}
