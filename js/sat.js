@@ -135,7 +135,7 @@ function handleTargets(id){
 
 		}
 		static initListeners(){
-			if (isDefined(document)) {
+			if ( document ) {
 				document.addEventListener(`keydown`, this.handleKeysDown)
 				document.addEventListener(`keyup`, this.handleKeysUp)
 			}
@@ -196,12 +196,41 @@ function handleTargets(id){
 				Global.fractions.push(fraction)
 			}
 		}
+		static generatePoint(){
+			let point = new Point(Math.floor( Math.random() * this.pageWidth), Math.floor( Math.random() * this.pageHeight))
+			if ( Global.point ){
+				if ( point.checkCollisionWith(Global.point) ){
+					return this.generatePoint()
+				}
+			}
+			if ( Global.targets && Global.targets.length > 0 ){
+				let counter = 0
+				let collision = false
+				for (let i = 0; i < Global.targets.length; i++ ){
+					if ( Global.targets[i] ){
+						if ( point.checkCollisionWith( Global.targets[i] ) ) {
+							counter++
+							collision = true
+						}
+					}
+				}
+				if ( collision & counter == Global.targets.length  ){
+					return false
+				}else if ( collision ){
+					return this.generatePoint()
+				}
+			}
+			return point
+		}
 		static createTargets(count = 1){
 			for (let i = 0; i < count; i++){
-				let target = new Target(Math.floor( Math.random() * this.pageWidth), Math.floor( Math.random() * this.pageHeight))
-				Global.targets.push(target)
+				let target = new Target()
+				let targetPoint = this.generatePoint()
+				if (targetPoint){
+					target.moveToPoint(targetPoint)
+					Global.targets.push(target)
+				}
 			}
-
 		}
 	}
 	class ContextHandler {
@@ -215,7 +244,7 @@ function handleTargets(id){
 		}
 		initCtx(id, width, height){
 			let canvas = document.getElementById(id)
-			if (isDefined(canvas)){
+			if ( canvas ){
 				canvas.height = height
 				canvas.width = width
 				if (canvas.getContext){
@@ -244,14 +273,14 @@ function handleTargets(id){
 		}
 		clearCtx(id){
 			let ctx = this[id]
-			if (isDefined(ctx)){
+			if ( ctx ){
 				ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height) 
 				ctx.closePath()
 			}			
 		}
 		fillBackground(id){
 			let ctx = this[id]
-			if ( isDefined(ctx) ){
+			if ( ctx ){
 				// Draw yellow background
 				ctx.beginPath();
 				ctx.fillStyle = '#ff6';
@@ -279,11 +308,11 @@ function handleTargets(id){
 		moveTo(x, y){
 			this.x = x
 			this.y = y
-			//for move eventx
+			//for move events
 			this.move()
 		}
 		moveToPoint(point){
-			if (isDefined(point)){
+			if ( point ){
 				this.moveTo(point.x, point.y)
 			}
 		}
@@ -311,13 +340,16 @@ function handleTargets(id){
 			newX += deltaX
 			newY += deltaY
 
-			return new Point(newX, newY)
+			//return new Point(newX, newY)
+			return this.copy(newX, newY)
 		}
 		render(ctx){
-			ctx.fillStyle = `black` 
-			ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
-			ctx.closePath()
-			ctx.fill()
+			if ( ctx ){
+				ctx.fillStyle = `black` 
+				ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
+				ctx.closePath()
+				ctx.fill()
+			}
 		}
 		setMove(upM, downM, rightM, leftM){
 			this.upM = upM
@@ -325,8 +357,28 @@ function handleTargets(id){
 			this.rightM = rightM
 			this.leftM = leftM
 		}
-		getPoint(){
-			return new Point(this.x, this.y)
+		is(point){
+			return (this.x == point.x && this.y == point.y)
+		}
+		checkCollisionWith(point){
+			if ( point ){
+				if ( this.is(point) ){
+					return true
+				}
+				if (( this.x >= point.x - point.width/2 - this.width/2 && this.x <= point.x + point.width/2 + this.width/2 ) &&
+					( this.y >= point.y - point.height/2 - this.height/2 && this.y <= point.y + point.width/2 + this.height/2 )
+				){
+					return true
+				}
+			}
+			return false
+		}
+		copy(x, y){
+			let pointCopy = new Point( x || this.x, y || this.y)
+			pointCopy.speed = this.speed
+			pointCopy.width = this.width
+			pointCopy.height = this.height
+			return pointCopy
 		}
 	}
 
@@ -388,11 +440,8 @@ function handleTargets(id){
 			if ( Global.targets && Global.targets.length ){
 				for (let i = 0; i < Global.targets.length; i++ ){
 					if ( Global.targets[i] ){
-						if (( nextPoint.x >= Global.targets[i].x - Global.targets[i].width/2- nextPoint.width/2  && nextPoint.x <= Global.targets[i].x + Global.targets[i].width/2 + nextPoint.width/2 ) &&
-							( nextPoint.y >= Global.targets[i].y - Global.targets[i].height/2 -  nextPoint.height/2  && nextPoint.y <= Global.targets[i].y + Global.targets[i].height/2 +  nextPoint.height/2 ) 
-						) {
-							let tempTarget = Global.targets[i].getPoint()
-							return tempTarget
+						if ( nextPoint.checkCollisionWith( Global.targets[i] ) ){
+							return Global.targets[i].copy()
 						}
 					}
 				}
@@ -401,18 +450,20 @@ function handleTargets(id){
 		}
 		handleMovement(id){
 			let ctx = Global.ctx.getCtx(id)
-			let nextMove = this.checkMove()
-			if ( nextMove.x >= ctx.canvas.width - 1 || nextMove.x <= 1 || nextMove.y >= ctx.canvas.height - 1 || nextMove.y <= 1 ){
-				this.render(ctx)
-			} else {
-				let checkTargets = this.checkTargetBorder(nextMove)
-				if ( checkTargets ){
-					console.log('collision with target')
-					Global.initglobal()
-				}else{
-					this.moveToPoint(nextMove)
+			if ( ctx ){
+				let nextMove = this.checkMove()
+				if ( nextMove.x >= ctx.canvas.width - 1 || nextMove.x <= 1 || nextMove.y >= ctx.canvas.height - 1 || nextMove.y <= 1 ){
+					this.render(ctx)
+				} else {
+					let checkTargets = this.checkTargetBorder(nextMove)
+					if ( checkTargets ){
+						console.log('collision with target')
+						Global.initglobal()
+					}else{
+						this.moveToPoint(nextMove)
+					}
+					this.render(ctx)
 				}
-				this.render(ctx)
 			}
 		}
 	}
@@ -424,10 +475,12 @@ function handleTargets(id){
 			this.height = 10 * Global.widthD 
 		}
 		render(ctx){
-			ctx.fillStyle = `gray` 
-			ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
-			ctx.closePath()
-			ctx.fill()
+			if ( ctx ){
+				ctx.fillStyle = `gray` 
+				ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
+				ctx.closePath()
+				ctx.fill()
+			}
 		}
 	}
 	class BulletPoint extends Point{
@@ -439,10 +492,12 @@ function handleTargets(id){
 			this.height = 4 * Global.widthD 
 		}
 		render(ctx){
-			ctx.fillStyle = `red` 
-			ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
-			ctx.closePath()
-			ctx.fill()
+			if ( ctx ){
+				ctx.fillStyle = `red` 
+				ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
+				ctx.closePath()
+				ctx.fill()
+			}
 		}
 		checkMove(){
 			let newX = this.x
@@ -472,19 +527,22 @@ function handleTargets(id){
 		}
 		checkCollision(id){
 			let ctx = Global.ctx.getCtx(id)
-			let nextPoint = this.checkMove()
-			this.moveToPoint(nextPoint)
-			let border = this.checkCanvasBorder(ctx, nextPoint)
-			if ( border ){
-				this.createBulletFraction(id, border)
-			 	return false
+			if ( ctx ){
+				let nextPoint = this.checkMove()
+				this.moveToPoint(nextPoint)
+				let border = this.checkCanvasBorder(ctx, nextPoint)
+				if ( border ){
+					this.createBulletFraction(id, border)
+					Global.createTargets(3)
+				 	return false
+				}
+				let target = this.checkTargetBorder(nextPoint)
+				if ( target ){
+					this.createBulletFraction(id, target)
+				 	return false
+				}
+				this.render(ctx)
 			}
-			let target = this.checkTargetBorder(nextPoint)
-			if ( target ){
-				this.createBulletFraction(id, target)
-			 	return false
-			}
-			this.render(ctx)
 			return true	
 		}
 		checkCanvasBorder(ctx, nextPoint){
@@ -504,10 +562,8 @@ function handleTargets(id){
 			if ( Global.targets && Global.targets.length ){
 				for (let i = 0; i < Global.targets.length; i++ ){
 					if ( Global.targets[i] ){
-						if (( nextPoint.x >= Global.targets[i].x - Global.targets[i].width/2  && nextPoint.x <= Global.targets[i].x + Global.targets[i].width/2 ) &&
-							( nextPoint.y >= Global.targets[i].y - Global.targets[i].height/2  && nextPoint.y <= Global.targets[i].y + Global.targets[i].height/2 )
-						) {
-							let tempTarget = Global.targets[i].getPoint()
+						if ( nextPoint.checkCollisionWith( Global.targets[i] ) ) {
+							let tempTarget = Global.targets[i].copy()
 							Global.createTargets(2)
 							Global.targets[i] = undefined
 							return tempTarget
@@ -518,8 +574,6 @@ function handleTargets(id){
 			return false
 		}
 		createBulletFraction(id, point){
-			let ctx = Global.ctx.getCtx(id)
-
 			let fraction = undefined
 
 			if ( !this.downM ){
@@ -657,24 +711,28 @@ function handleTargets(id){
 			this.height = 2 * Global.widthD 
 		}
 		render(ctx){
-			ctx.fillStyle = `red` 
-			ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
-			ctx.closePath()
-			ctx.fill()
+			if ( ctx ){
+				ctx.fillStyle = `red` 
+				ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
+				ctx.closePath()
+				ctx.fill()
+			}
 		}
 		move(){
 			this.life--
 		}
 		checkColisson(id){
 			let ctx = Global.ctx.getCtx(id)
-			let nextPoint = this.checkMove()
-			let border =  this.checkCanvasBorder(ctx, nextPoint)
-			if ( border ){
-				return false
-			}else {
-				this.moveToPoint(nextPoint)
-				this.render(ctx)
-				return true
+			if ( ctx ){
+				let nextPoint = this.checkMove()
+				let border =  this.checkCanvasBorder(ctx, nextPoint)
+				if ( border ){
+					return false
+				}else {
+					this.moveToPoint(nextPoint)
+					this.render(ctx)
+					return true
+				}
 			}
 		}
 	}
