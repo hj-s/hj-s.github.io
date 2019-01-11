@@ -85,7 +85,12 @@ function handlePoint(id){
 		if ( nextMove.x >= ctx.canvas.width - 1 || nextMove.x <= 1 || nextMove.y >= ctx.canvas.height - 1 || nextMove.y <= 1 ){
 			Global.point.render(ctx)
 		} else {
-			Global.point.moveToPoint(nextMove)
+			let checkTargets = Global.point.checkTargetBorder(nextMove)
+			if ( checkTargets ){
+				console.log('collision with target')
+			}else{
+				Global.point.moveToPoint(nextMove)
+			}
 			Global.point.render(ctx)
 		}
 	}
@@ -391,6 +396,21 @@ function handleTargets(id){
 
 			return new Point(newX, newY)
 		}
+		checkTargetBorder(nextPoint){
+			if ( Global.targets && Global.targets.length ){
+				for (let i = 0; i < Global.targets.length; i++ ){
+					if ( Global.targets[i] ){
+						if (( nextPoint.x >= Global.targets[i].x - Global.targets[i].width/2- nextPoint.width/2  && nextPoint.x <= Global.targets[i].x + Global.targets[i].width/2 + nextPoint.width/2 ) &&
+							( nextPoint.y >= Global.targets[i].y - Global.targets[i].height/2 -  nextPoint.height/2  && nextPoint.y <= Global.targets[i].y + Global.targets[i].height/2 +  nextPoint.height/2 ) 
+						) {
+							let tempTarget = Global.targets[i].getPoint()
+							return tempTarget
+						}
+					}
+				}
+			}
+			return false
+		}
 	}
 	class Target extends Point{
 		constructor(x = 0, y = 0){
@@ -479,13 +499,15 @@ function handleTargets(id){
 		checkTargetBorder(nextPoint){
 			if ( Global.targets && Global.targets.length ){
 				for (let i = 0; i < Global.targets.length; i++ ){
-					if (( nextPoint.x >= Global.targets[i].x - Global.targets[i].width/2  && nextPoint.x <= Global.targets[i].x + Global.targets[i].width/2 ) &&
-						( nextPoint.y >= Global.targets[i].y - Global.targets[i].height/2  && nextPoint.y <= Global.targets[i].y + Global.targets[i].height/2 )
-					) {
-						let tempTarget = Global.targets[i].getPoint()
-						Global.createTargets(2)
-						Global.targets[i] = undefined
-						return tempTarget
+					if ( Global.targets[i] ){
+						if (( nextPoint.x >= Global.targets[i].x - Global.targets[i].width/2  && nextPoint.x <= Global.targets[i].x + Global.targets[i].width/2 ) &&
+							( nextPoint.y >= Global.targets[i].y - Global.targets[i].height/2  && nextPoint.y <= Global.targets[i].y + Global.targets[i].height/2 )
+						) {
+							let tempTarget = Global.targets[i].getPoint()
+							Global.createTargets(2)
+							Global.targets[i] = undefined
+							return tempTarget
+						}
 					}
 				}
 			}
