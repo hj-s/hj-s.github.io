@@ -32,28 +32,29 @@ function draw(){
 
 function handleSpacebar(id){
 	let ctx = Global.ctx.getCtx(id)
-	if ( Global.spacebar && !Global.bulletTimer ){
-		Global.spacebar = false
+	if ( ctx ){
+		if ( Global.spacebar && !Global.bulletTimer ){
+			Global.spacebar = false
 
-		if ( ( Global.upM && Global.downM ) || ( Global.rightM && Global.leftM ) || 
-			( !Global.upM && !Global.downM && !Global.rightM && !Global.leftM && !Global.point.upML && !Global.point.downML && !Global.point.rightML && !Global.point.leftML  ) ){
-			return false
+			if ( ( Global.upM && Global.downM ) || ( Global.rightM && Global.leftM ) || 
+				( !Global.upM && !Global.downM && !Global.rightM && !Global.leftM && !Global.point.upML && !Global.point.downML && !Global.point.rightML && !Global.point.leftML  ) ){
+				return false
+			}
+			let bullet = undefined
+			if ( Global.point ){
+				bullet = new BulletPoint(Global.point.x, Global.point.y)
+			}else{
+				bullet = new BulletPoint(Global.startPointX, Global.startPointY)
+			}
+			bullet.setMove( Global.upM || Global.point.upML,  Global.downM || Global.point.downML, Global.rightM || Global.point.rightML, Global.leftM || Global.point.leftML )
+			bullet.fired = true
+			bullet.render(ctx)
+			Global.bullet.push(bullet)
+			Global.bulletTimer = setTimeout(Global.resetBulletTimer, 100)
 		}
-		let bullet = undefined
-		if ( Global.point ){
-			bullet = new BulletPoint(Global.point.x, Global.point.y)
-		}else{
-			bullet = new BulletPoint(Global.startPointX, Global.startPointY)
-		}
-		bullet.setMove( Global.upM || Global.point.upML,  Global.downM || Global.point.downML, Global.rightM || Global.point.rightML, Global.leftM || Global.point.leftML )
-		bullet.fired = true
-		bullet.render(ctx)
-		Global.bullet.push(bullet)
-		Global.bulletTimer = setTimeout(Global.resetBulletTimer, 100)
 	}
 }
 function handleBullets(id){
-	//let ctx = Global.ctx.getCtx(id)
 	if (Global.bullet && Global.bullet.length){
 		for ( let i = 0; i < Global.bullet.length; i++ ){
 			if ( Global.bullet[i] ){
@@ -66,8 +67,6 @@ function handleBullets(id){
 	Global.bullet = Global.bullet.filter(x => x)
 }
 function handleBulletFractions(id){
-	let ctx = Global.ctx.getCtx(id)
-
 	if ( Global.fractions && Global.fractions.length){
 		for ( let i = 0; i < Global.fractions.length; i++ ){
 			if ( !( Global.fractions[i] && Global.fractions[i].life > 0 && Global.fractions[i].checkColisson(id) ) ){
@@ -78,21 +77,22 @@ function handleBulletFractions(id){
 	Global.fractions = Global.fractions.filter(x => x)
 }
 function handlePoint(id){
-
 	if ( Global.point ){
 		Global.point.handleMovement(id)
 	}
 }
 function handleTargets(id){
 	let ctx = Global.ctx.getCtx(id)
-
-	if ( Global.targets && Global.targets.length ){
-		for (let i = 0; i < Global.targets.length; i++ ){
-			if ( Global.targets[i] ){
-				Global.targets[i].render(ctx)
+	if ( ctx ){
+		if ( Global.targets && Global.targets.length ){
+			for (let i = 0; i < Global.targets.length; i++ ){
+				if ( Global.targets[i] ){
+					Global.targets[i].render(ctx)
+				}
 			}
 		}
 	}
+
 	Global.targets = Global.targets.filter(x => x)
 }
 //class {
