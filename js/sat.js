@@ -97,6 +97,7 @@ function handleTargets(id){
 	}
 
 	Global.targets = Global.targets.filter(x => x)
+	Global.countTargets = Global.targets.length
 }
 //class {
 	class Global {
@@ -202,11 +203,11 @@ function handleTargets(id){
 				Global.fractions.push(fraction)
 			}
 		}
-		static generatePoint(){
-			let point = new Point(Math.floor( Math.random() * this.pageWidth), Math.floor( Math.random() * this.pageHeight ))
+		static generateTarget(){
+			let point = new Target(Math.floor( Math.random() * this.pageWidth), Math.floor( Math.random() * this.pageHeight ))
 			if ( Global.point ){
-				if ( point.checkCollisionWith(Global.point) ){
-					return this.generatePoint()
+				if ( Global.point.checkCollisionWith(point) ){
+					return this.generateTarget()
 				}
 			}
 			if ( Global.targets && Global.targets.length > 0 ){
@@ -223,15 +224,18 @@ function handleTargets(id){
 				if ( collision & counter == Global.targets.length  ){
 					return false
 				}else if ( collision ){
-					return this.generatePoint()
+					return this.generateTarget()
 				}
 			}
 			return point
 		}
 		static createTargets(count = 1){
+			if ( Global.countTargets >= 1000 ){
+				return false
+			}
 			for (let i = 0; i < count; i++){
 				let target = new Target()
-				let targetPoint = this.generatePoint()
+				let targetPoint = this.generateTarget()
 				if (targetPoint){
 					target.moveToPoint(targetPoint)
 					Global.targets.push(target)
@@ -750,11 +754,27 @@ function handleTargets(id){
 				if ( border ){
 					return false
 				}else {
+					let target = this.checkTargetBorder(nextPoint)
 					this.moveToPoint(nextPoint)
 					this.render(ctx)
 					return true
 				}
+				let target = this.checkTargetBorder(nextPoint)
 			}
+		}
+		checkTargetBorder(nextPoint){
+			if ( Global.targets && Global.targets.length ){
+				for (let i = 0; i < Global.targets.length; i++ ){
+					if ( Global.targets[i] ){
+						if ( nextPoint.checkCollisionWith( Global.targets[i] ) ) {
+							let tempTarget = Global.targets[i].copy()
+							Global.targets[i] = undefined
+							return tempTarget
+						}
+					}
+				}
+			}
+			return false
 		}
 	}
 //}
