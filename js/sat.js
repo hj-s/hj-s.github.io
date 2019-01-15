@@ -30,6 +30,7 @@ function draw(){
 	handleTargets(Global.mainCanvas)
 
 	Global.renderCounters(Global.mainCanvas)
+	Global.renderControls(Global.mainCanvas)
 }
 
 function handleSpacebar(id){
@@ -111,6 +112,7 @@ function handleTargets(id){
 			Global.rightM = false
 			Global.leftM = false
 			Global.spacebar = false
+			Global.shift = false
 			Global.bullet = []
 			Global.bulletTimer = undefined
 			Global.fractions = []
@@ -150,6 +152,7 @@ function handleTargets(id){
 
 		//handle keys
 		static handleKeysDown(event){
+			//console.log(event.keyCode)
 			//check what keys are down
 			if (event.key == `W` || event.key == `w` || event.keyCode == 119 || event.keyCode == 87 || event.keyCode == 38) { //w
 				Global.upM = true
@@ -165,6 +168,9 @@ function handleTargets(id){
 			}
 			if (event.keyCode == 32 ){
 				Global.spacebar = true
+			}
+			if (event.keyCode == 16){
+				Global.shift = true
 			}
 		}
 		//handle keys
@@ -184,6 +190,9 @@ function handleTargets(id){
 			}
 			if (event.keyCode == 32 ){
 				Global.spacebar = false
+			}
+			if (event.keyCode == 16){
+				Global.shift = false
 			}
 		}
 		static forDebug(){
@@ -248,10 +257,23 @@ function handleTargets(id){
 			if ( ctx ){
 				let size = 20 * Global.widthD
 				ctx.font = `${size}px calibri`;
-				ctx.strokeStyle = `red`
-				ctx.globalAlpha = 0.2;
+				ctx.fillStyle = `red`
+				ctx.globalAlpha = 0.3;
 				let text = ` ${Global.countTargetsHits} / ${Global.countTargets} / ${Global.countHits} `
-  				ctx.strokeText(text, 20*Global.widthD, 20*Global.widthD)
+  				ctx.fillText(text, 20*Global.widthD, 20*Global.widthD)
+  				ctx.closePath()
+  				ctx.globalAlpha = 1;
+			}
+		}
+		static renderControls(id){
+			let ctx = Global.ctx.getCtx(id)
+			if ( ctx ){
+				let size = 10 * Global.widthD
+				ctx.font = `${size}px calibri`;
+				ctx.fillStyle = `red`
+				ctx.globalAlpha = 0.5;
+				let text = ` \u24cc \u24B6 \u24C8 \u24B9 to move | SPACE to shoot | SHIFT to slow down`
+  				ctx.fillText(text, ctx.canvas.width- 250*Global.widthD, ctx.canvas.height- 20*Global.widthD)
   				ctx.closePath()
   				ctx.globalAlpha = 1;
 			}
@@ -413,6 +435,7 @@ function handleTargets(id){
 			this.downML = false
 			this.rightML = false
 			this.leftML = false
+			this.speed = 1.5 * Global.widthD
 		}
 		checkMove(){
 			let newX = this.x
@@ -455,6 +478,10 @@ function handleTargets(id){
 				this.rightML = false
 				this.leftML = false
 			}
+			if ( Global.shift ){
+				deltaX =  deltaX/2
+				deltaY =  deltaY/2
+			}
 			newX += deltaX
 			newY += deltaY
 
@@ -476,9 +503,21 @@ function handleTargets(id){
 			let ctx = Global.ctx.getCtx(id)
 			if ( ctx ){
 				let nextMove = this.checkMove()
-				if ( nextMove.x >= ctx.canvas.width - 1 || nextMove.x <= 1 || nextMove.y >= ctx.canvas.height - 1 || nextMove.y <= 1 ){
+				if ( nextMove.x >= ctx.canvas.width - this.width/2 - 1 ){
+					nwextMove.x = ctx.canvas.width - this.width/2 - 2
+				}
+				if ( nextMove.x <= 1 + this.width/2 ){
+					nextMove.x = 2 + this.width/2
+				}
+				if ( nextMove.y >= ctx.canvas.height - this.width/2 - 1 ){
+					nextMove.y = ctx.canvas.height - this.width/2 - 2
+				}
+				if ( nextMove.y <= 1 + this.width/2 ){
+					nextMove.y = 2 + this.width/2
+				}
+				//if ( nextMove.x >= ctx.canvas.width - this.width/2 - 1 || nextMove.x <= 1 + this.width/2 || nextMove.y >= ctx.canvas.height - this.width/2 - 1 || nextMove.y <= 1 + this.width/2 ){
 					this.render(ctx)
-				} else {
+				//} else {
 					let checkTargets = this.checkTargetBorder(nextMove)
 					if ( checkTargets ){
 						console.log('collision with target')
@@ -487,7 +526,7 @@ function handleTargets(id){
 						this.moveToPoint(nextMove)
 					}
 					this.render(ctx)
-				}
+				//}
 			}
 		}
 	}
@@ -495,8 +534,8 @@ function handleTargets(id){
 		constructor(x = 0, y = 0){
 			super(x ,y)
 			this.speed = 6 * Global.widthD 
-			this.width = 10 * Global.widthD 
-			this.height = 10 * Global.widthD 
+			this.width = 20 * Global.widthD 
+			this.height = 20 * Global.widthD 
 		}
 		render(ctx){
 			if ( ctx ){
@@ -552,8 +591,8 @@ function handleTargets(id){
 		checkCollision(id){
 			let ctx = Global.ctx.getCtx(id)
 			if ( ctx ){
+				//this.render(ctx)
 				let nextPoint = this.checkMove()
-				this.moveToPoint(nextPoint)
 				let border = this.checkCanvasBorder(ctx, nextPoint)
 				if ( border ){
 					this.createBulletFraction(id, border)
@@ -566,6 +605,7 @@ function handleTargets(id){
 					Global.countTargetsHits++
 				 	return false
 				}
+				this.moveToPoint(nextPoint)
 				this.render(ctx)
 			}
 			return true	
@@ -589,7 +629,7 @@ function handleTargets(id){
 					if ( Global.targets[i] ){
 						if ( nextPoint.checkCollisionWith( Global.targets[i] ) ) {
 							let tempTarget = Global.targets[i].copy()
-							Global.createTargets(2)
+							Global.createTargets(1)
 							Global.targets[i] = undefined
 							return tempTarget
 						}
