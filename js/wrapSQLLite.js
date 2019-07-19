@@ -1,7 +1,7 @@
 const isDefined = (check) => (check !== undefined);
 const isFeature = (check, property) => ( isDefined(check) ? check.hasOwnProperty(property) : false);
 
-const dhcomma = `"`;
+//const dhcomma = `"`;
 const hcomma = `'`;
 const tab = `\t`;
 const line = `\n`;
@@ -9,95 +9,23 @@ const bslash = `\\`;
 const space = ` `;
 const plus = `+`;
 const nt = ``;
-const keywordsSingle = [`from `, `order by `, `where `, `inner join `, `outer join `, `left join `,`group by `];
-const keyrowdsMany = [ ` on `, ` and `, ` or `];
+
 
 var scomma, endLine, newLine;
 
 //add tag to string
-// if (!String.prototype.WrapTag){String.prototype.WrapTag = function(tag){
-// 		return tag + this + tag
-// 	};
-// }
 (!String.prototype.WrapTag) ? 
 	String.prototype.WrapTag = function(tag) { return tag + this + tag } 
 	: console.log(`WrapTag is used`);
 
 //add single comma to string 
-// if (!String.prototype.InComma){String.prototype.InComma = function(){
-// 		return this.replace(/'/g, hcomma + hcomma)
-// 				.WrapTag(hcomma)
-// 	};
-// }
 (!String.prototype.InComma) ? 
 	String.prototype.InComma = function(){ return this.replace(new RegExp(scomma,`g`), scomma + scomma).WrapTag(scomma) } 
 	: console.log(`InComma is used`);
 
-// if (!String.prototype.surrondLite){String.prototype.surrondLite = function(){
-// 		return this.replace(new RegExp(line,`g`), newLine )
-// 	};
-// }
 (!String.prototype.surrondLite) ? 
 	String.prototype.surrondLite = function(){ return this.replace(new RegExp(line,`g`), newLine) } 
 	: console.log(`surrondLite is used`);
-
-// wrap keyword
-// if (!String.prototype.wrapKeywordLite){String.prototype.wrapKeywordLite = function(keyword, wrapper){
-// 		return this.replace(new RegExp(keyword,`g`), wrapper+keyword)
-// 	}
-// }
-(!String.prototype.wrapKeywordLite) ? 
-	String.prototype.wrapKeywordLite = function(keyword, wrapper){ return this.replace(new RegExp(keyword,`g`), wrapper + keyword) } 
-	: console.log(`wrapKeywordLite is used`);
-
-//wrap array of keywords
-// if (!String.prototype.handleArrayLite){String.prototype.handleArrayLite = function(keywords, wrapper){
-// 		var strSQL = this;
-// 		for (keyword in keywords){
-// 			strSQL = strSQL.wrapKeywordLite(keywords[keyword], wrapper);
-// 		}
-// 		return strSQL
-// 	};
-// }
-(!String.prototype.handleArrayLite) ? 
-	String.prototype.handleArrayLite = function(keywords, wrapper){
-		var strSQL = this
-		for (keyword in keywords){
-			strSQL = strSQL.wrapKeywordLite(keywords[keyword], wrapper)
-		}
-		return strSQL
-	} 
-	: console.log(`wrapKeywordLite is used`);
-
-//wrap lines
-// if (!String.prototype.handleLines){String.prototype.handleLines = function(){
-// 		return this.handleArrayLite(keywordsSingle,  newLine)
-// 				.handleArrayLite(keyrowdsMany, newLine + tab)
-// 	};
-// }
-(!String.prototype.handleLines) ? 
-	String.prototype.handleLines = function(){ return this.handleArrayLite(keywordsSingle,  newLine).handleArrayLite(keyrowdsMany, newLine + tab) } 
-	: console.log(`handleLines is used`);
-
-//wrap SQL request
-// if (!String.prototype.handleSQL){String.prototype.handleSQL = function(){
-// 		return this.replace(/\n|\t/g,``)
-// 				.replace(/ , |, | ,/g, `,`)
-// 				.handleLines()
-// 	};
-// }
-(!String.prototype.handleSQL) ? 
-	String.prototype.handleSQL = function(){ return this.replace(/\n|\t/g,``).replace(/ , |, | ,/g, `,`).handleLines() } 
-	: console.log(`handleSQL is used`);
-
-//surround lines like `\n` -> ` ' + \\ \n'`
-// if (!String.prototype.surroundLinesWith){String.prototype.surroundLinesWith = function(){
-// 		return this.surroundWith(line, endLine, hcomma)
-// 	};
-//}
-(!String.prototype.surroundLinesWith) ? 
-	String.prototype.surroundLinesWith = function(){ return this.surroundWith(line, endLine, scomma) } 
-	: console.log(`surroundLinesWith is used`);
 
 //init wrapper args
 (!String.prototype.initWrap) ? 
@@ -115,17 +43,77 @@ var scomma, endLine, newLine;
 	} 
 	: console.log(`initWrap is used`);
 
+
+(!String.prototype.paseSqlString) ? 
+	String.prototype.paseSqlString =  function(){
+		let str = this.replace(/\n|\t/g,``)
+		let sqlArray = str.split(' ')
+		let sqlResult = []
+		let newLine = '\n'
+		let tabCounter = 0
+		let tab = '\t'
+		let join = false
+		for (let i = 0; i < sqlArray.length; i++){
+			switch (sqlArray[i]) {
+				case "SELECT":
+					if ( tabCounter == 0 ){
+						sqlResult.push(sqlArray[i])
+					}else{
+						sqlResult.push(newLine + tab.repeat(tabCounter*2) + sqlArray[i])
+					}
+					break;
+				case "FROM":
+				case "WHERE":
+				case "HAVING":
+				case "ORDER":
+				case "GROUP":
+					sqlResult.push(newLine + tab.repeat(tabCounter*2) + sqlArray[i])
+					break;
+				case "INNER":
+				case "LEFT":
+				case "OUTER":
+					sqlResult.push(newLine + tab.repeat(tabCounter*2) + sqlArray[i])
+					join = true
+					break;
+				case "JOIN":
+					if (join){
+						sqlResult.push(sqlArray[i])
+						join = false
+						
+					}else{
+						sqlResult.push(newLine + tab.repeat(tabCounter*2) + sqlArray[i])
+					}
+					break;
+				case "OR":
+				case "AND":
+				case "ON":
+					sqlResult.push(newLine + tab.repeat(tabCounter*2+1) + sqlArray[i])
+					break;
+				case "(":
+					sqlResult.push(sqlArray[i])
+					tabCounter++
+					break;
+				case ")":
+					tabCounter--
+					sqlResult.push(newLine + tab.repeat(tabCounter*2+1) + sqlArray[i])
+					break;
+				default:
+					sqlResult.push(sqlArray[i])
+					break;
+			}
+		}
+		return sqlResult.join(' ')
+	}
+	: console.log('paseSqlString is used');
 //main function wrap
 (!String.prototype.wrap) ? 
 	String.prototype.wrap = function(action, args = undefined){
 		console.log(`source: ` + line + this + line)
-		var str = ``
-		var time = isDefined(performance) ? performance.now() : 0
+		var str = ''
+		//var time = isDefined(performance) ? performance.now() : 0
 		switch (action) {
 			case `wrap`: 
-				str = this.initWrap(args).trim()
-						.InComma()
-						.handleSQL()
+				str = this.paseSqlString()
 				break
 			case `surround`:
 				str = this.initWrap(args).trim()
@@ -137,9 +125,14 @@ var scomma, endLine, newLine;
 				console.log(str)
 				break
 		}
-		time = isDefined(performance) ? performance.now() - time : 0
+		//time = isDefined(performance) ? performance.now() - time : 0
 		console.log(`result: ` + line + str)
-		console.log(`time: ` + time)
+		//console.log(`time: ` + time)
 		return str
 	} 
 	: console.log(`wrap is used`);
+
+
+//let str = 'SELECT DISTINCT 	zc.PackageDataID, 	zce.main_contract_id, 	zce.contract_id, 	zce.unique_id AS unique_new, 	zce.number, 	zc.MajorVersion, 	zc.MinorVersion, 	zce.last_update_date, 	zc2.ContractDataID, 	zcd.unique_id AS unique_old, 	zc2.Number, 	zce2.last_update_date, 	zc2.MajorVersion, 	zc2.MinorVersion  FROM ZContrExport AS zce JOIN ZContracts AS zc 	ON zc.ContractDataID = zce.contract_id JOIN ZContracts AS zc2 	ON zc2.PackageDataID = zc.PackageDataID AND zc2.DocumentTypeDataID = zc.DocumentTypeDataID AND zc2.Number = zc.Number AND zc2.MainContractID <> zc2.ContractDataID JOIN zcat_contract_document AS zcd 	ON zcd.DataID = zc2.ContractDataID AND zcd.unique_id IS NOT NULL AND zcd.unique_id <> zce.unique_id JOIN ZContrExport AS zce2 	ON zce2.unique_id = zcd.unique_id WHERE zce.unique_id <> zce.main_contract_id  	AND zc.MajorVersion IN ( SELECT MAX(zcs.MajorVersion) 		FROM ZContracts AS zcs 		WHERE zcs.PackageDataID = zc.PackageDataID AND zcs.Number = zc.Number AND zcs.DocumentTypeDataID = zc.DocumentTypeDataID AND zcs.MinorVersion = AND zc.MajorVersion IN ( SELECT MAX(zcs.MajorVersion) 		FROM ZContracts AS zcs 		WHERE zcs.PackageDataID = zc.PackageDataID AND zcs.Number = zc.Number AND zcs.DocumentTypeDataID = zc.DocumentTypeDataID AND zcs.MinorVersion = 0 	)  	) AND zc.MajorVersion IN ( SELECT MAX(zcs.MajorVersion) 		FROM ZContracts AS zcs 		WHERE zcs.PackageDataID = zc.PackageDataID AND zcs.Number = zc.Number AND zcs.DocumentTypeDataID = zc.DocumentTypeDataID AND zcs.MinorVersion = 0 	) ORDER BY zc.MajorVersion ASC'
+
+
