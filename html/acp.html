@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Album cover pano</title>
+	<script src="../js/html2canvas.min.js"></script>
+	<style type="text/css">
+		#pano {
+			width: auto;
+			display: inline-block;
+		}
+		#cover {
+			width: 500px;
+		}
+		img {
+			display: block;
+			float: left;
+		}
+		body{
+			text-align: center;
+		}
+		input{
+			font-family: monospace;
+			margin-bottom: 5px;
+			margin-top: 5px;
+		}
+		label{
+			font-family: monospace;
+		}
+		.button{
+			-webkit-transition-duration: 0.4s;
+			transition-duration: 0.4s;
+			background-color: #e7e7e7; 
+			border: none;
+			color: black;
+			text-align: center;
+			text-decoration: none;
+			display: inline-block;
+		}
+		.button:hover {
+		    background-color: #aaaaaa; 
+		    color: white;
+		}
+		.button:active {
+		  transform: translateY(4px);
+		}
+		.button-left{
+			text-align: left;
+			float: left;
+			margin-right: -42px;
+		}
+		.wrapper{
+			padding:5px;
+		}
+
+	</style>
+	<script type="text/javascript">
+		function addImage(){
+			var pano = document.getElementById("pano");
+			var img1 = document.createElement("img");
+			img1.src = document.getElementById("cover").value;
+			img1.width = 273;
+			img1.height = 273;
+			pano.append(img1);
+
+		}
+		function clearPano() {
+			document.getElementById("pano").innerHTML = '';
+		}
+		function createPano(){
+			document.getElementById("panoCanvas").innerHTML = '';
+			html2canvas(document.getElementById("pano"),  
+					{ 
+						height: document.getElementById("pano").clientHeight,
+						width: document.getElementById("pano").clientWidth,
+						allowTaint : true
+					}).then(function(canvas) {
+				var panoCanvas = document.getElementById("panoCanvas");
+				panoCanvas.append(canvas);
+			});
+
+		}
+	</script>
+</head>
+<body>
+	<input type="text" id="cover" placeholder="cover" value="https://f4.bcbits.com/img/a3803719558_10.jpg">
+	<input type="button" name="addImage" value="add image" onclick="addImage();">
+	<input type="button" name="createPano" value="create pano" onclick="createPano();">
+	<input type="button" name="clearPano" value="clear pano" onclick="clearPano();">
+	<div class="wrapper">
+		<div id="pano" class="pano">
+
+		</div>	
+	</div>
+	<div class="wrapper">
+		<div id="panoCanvas" class="panoCanvas">
+
+		</div>
+	</div>
+
+</body>
+</html>
