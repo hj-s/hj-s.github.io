@@ -4,13 +4,7 @@
 	<title>Album cover pano</title>
 	<script src="../js/html2canvas.min.js"></script>
 	<style type="text/css">
-		#pano {
-			width: auto;
-			display: inline-block;
-		}
-		#cover {
-			width: 500px;
-		}
+
 		img {
 			display: block;
 			float: left;
@@ -51,15 +45,29 @@
 		.wrapper{
 			padding:5px;
 		}
+		.hide-scrollbar {
+			overflow: -moz-hidden-unscrollable;
+			overflow: hidden;
+		}
+
+		#pano {
+			width: auto;
+			display: inline-block;
+		}
+		#cover {
+			width: 500px;
+		}
 
 	</style>
 	<script type="text/javascript">
 		function addImage(){
 			var pano = document.getElementById("pano");
 			var img1 = document.createElement("img");
+			var width = document.getElementById("width").value;
+			var height = document.getElementById("height").value;
 			img1.src = document.getElementById("cover").value;
-			img1.width = 273;
-			img1.height = 273;
+			if ( width ) img1.width = width;
+			if ( height ) img1.height = height;
 			pano.append(img1);
 
 		}
@@ -68,21 +76,28 @@
 		}
 		function createPano(){
 			document.getElementById("panoCanvas").innerHTML = '';
+			document.documentElement.classList.add("hide-scrollbar");
 			html2canvas(document.getElementById("pano"),  
 					{ 
+						logging: true,
+						backgroundColor: null,
+						scale: 1,
 						height: document.getElementById("pano").clientHeight,
 						width: document.getElementById("pano").clientWidth,
 						allowTaint : true
 					}).then(function(canvas) {
 				var panoCanvas = document.getElementById("panoCanvas");
 				panoCanvas.append(canvas);
+				document.documentElement.classList.remove("hide-scrollbar");
 			});
 
 		}
 	</script>
 </head>
 <body>
-	<input type="text" id="cover" placeholder="cover" value="https://f4.bcbits.com/img/a3803719558_10.jpg">
+	<input type="text" id="cover" placeholder="cover" value="">
+	<input type="text" id="width" placeholder="width" value="">
+	<input type="text" id="height" placeholder="height" value="">
 	<input type="button" name="addImage" value="add image" onclick="addImage();">
 	<input type="button" name="createPano" value="create pano" onclick="createPano();">
 	<input type="button" name="clearPano" value="clear pano" onclick="clearPano();">
