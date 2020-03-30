@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>time calculator</title>
+	<script src="../js/timeCalc.js"> </script>
+	<script type="text/javascript">
+		window.onload = function() {
+			let time = new timeCalc()
+			window.time = time
+			document.getElementById("timeView").innerHTML = window.time.getTime()
+			document.getElementById("addButton").addEventListener("click", handleAdd)
+		}
+		function refreshTime() {
+			document.getElementById("timeView").innerHTML = window.time.getTime()
+		}
+		function handleAdd(){
+			let timeValue = document.getElementById("time").value
+			if ( timeValue ) {
+				let timeArr = timeValue.split(":")
+				timeArr = timeArr.map(Number)
+				// if ( timeArr.length  ) {
+				 	window.time.addTimeArr( timeArr)
+				 	refreshTime()
+				// }
+			}
+		}
+
+	</script>
+</head>
+<body>
+	<input type="time" name="time" id="time" step="1"/>
+	<button id="addButton">add</button>
+	<br>
+	<h1>time: </h1>
+	<h1 id="timeView"></h1>
+</body>
+</html>
