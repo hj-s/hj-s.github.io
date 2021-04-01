@@ -105,6 +105,80 @@ var scomma, endLine, newLine;
 		return sqlResult.join(' ')
 	}
 	: console.log('paseSqlString is used');
+
+(!String.prototype.paseSqlString1) ? 
+	String.prototype.paseSqlString1 =  function(){
+		let str = this.replace(/\n|\t/g,``)
+		let sqlArray = str.split(' ')
+		let sqlResult = []
+		let newLine = '\n'
+		let tabCounter = 1
+		let tab = '\t'
+		let join = false
+		let condition = 0
+		for (let i = 0; i < sqlArray.length; i++){
+			switch (sqlArray[i].toUpperCase()) {
+				case "SELECT":
+				case "FROM":
+				case "WHERE":
+				case "HAVING":
+				case "ORDER":
+				case "GROUP":
+					condition = 0
+					sqlResult.push(newLine + tab.repeat(tabCounter) + sqlArray[i])
+					break;
+				case "INNER":
+				case "LEFT":
+				case "OUTER":
+					condition = 0
+					sqlResult.push(newLine + tab.repeat(tabCounter) + sqlArray[i])
+					join = true
+					break;
+				case "JOIN":
+					condition = 0
+					if (join){
+						sqlResult.push(sqlArray[i])
+						join = false
+					}else{
+						sqlResult.push(newLine + tab.repeat(tabCounter) + sqlArray[i])
+					}
+					break;
+				case "OR":
+				case "AND":
+				//case "ON":
+					// condition = 1
+					// let addTab = ( condition ? 1 : 0 ) 
+					// sqlResult.push(newLine + tab.repeat(tabCounter + addTab) + sqlArray[i])
+					condition = true
+					sqlResult.push(newLine + tab.repeat(tabCounter+1) + sqlArray[i])
+					break;
+				case "(":
+					if ( condition ) {
+						tabCounter++
+					}
+					sqlResult.push(sqlArray[i])
+					tabCounter++
+					break;
+				case ")":
+					tabCounter--
+					
+					// condition = (condition > 0) ? (condition - 1) : 0
+					// let addTab = condition
+					// sqlResult.push(newLine + tab.repeat(tabCounter + addTab) + sqlArray[i])
+					sqlResult.push(newLine + tab.repeat(tabCounter) + sqlArray[i])
+					if ( condition ) {
+						tabCounter--
+						condition = false
+					}
+					break;
+				default:
+					sqlResult.push(sqlArray[i])
+					break;
+			}
+		}
+		return sqlResult.join(' ')
+	}
+	: console.log('paseSqlString1 is used');
 //main function wrap
 (!String.prototype.wrap) ? 
 	String.prototype.wrap = function(action, args = undefined){
@@ -113,7 +187,7 @@ var scomma, endLine, newLine;
 		//var time = isDefined(performance) ? performance.now() : 0
 		switch (action) {
 			case `wrap`: 
-				str = this.paseSqlString()
+				str = this.paseSqlString1()
 				break
 			case `surround`:
 				str = this.initWrap(args).trim()
@@ -134,5 +208,5 @@ var scomma, endLine, newLine;
 
 
 //let str = 'SELECT DISTINCT 	zc.PackageDataID, 	zce.main_contract_id, 	zce.contract_id, 	zce.unique_id AS unique_new, 	zce.number, 	zc.MajorVersion, 	zc.MinorVersion, 	zce.last_update_date, 	zc2.ContractDataID, 	zcd.unique_id AS unique_old, 	zc2.Number, 	zce2.last_update_date, 	zc2.MajorVersion, 	zc2.MinorVersion  FROM ZContrExport AS zce JOIN ZContracts AS zc 	ON zc.ContractDataID = zce.contract_id JOIN ZContracts AS zc2 	ON zc2.PackageDataID = zc.PackageDataID AND zc2.DocumentTypeDataID = zc.DocumentTypeDataID AND zc2.Number = zc.Number AND zc2.MainContractID <> zc2.ContractDataID JOIN zcat_contract_document AS zcd 	ON zcd.DataID = zc2.ContractDataID AND zcd.unique_id IS NOT NULL AND zcd.unique_id <> zce.unique_id JOIN ZContrExport AS zce2 	ON zce2.unique_id = zcd.unique_id WHERE zce.unique_id <> zce.main_contract_id  	AND zc.MajorVersion IN ( SELECT MAX(zcs.MajorVersion) 		FROM ZContracts AS zcs 		WHERE zcs.PackageDataID = zc.PackageDataID AND zcs.Number = zc.Number AND zcs.DocumentTypeDataID = zc.DocumentTypeDataID AND zcs.MinorVersion = AND zc.MajorVersion IN ( SELECT MAX(zcs.MajorVersion) 		FROM ZContracts AS zcs 		WHERE zcs.PackageDataID = zc.PackageDataID AND zcs.Number = zc.Number AND zcs.DocumentTypeDataID = zc.DocumentTypeDataID AND zcs.MinorVersion = 0 	)  	) AND zc.MajorVersion IN ( SELECT MAX(zcs.MajorVersion) 		FROM ZContracts AS zcs 		WHERE zcs.PackageDataID = zc.PackageDataID AND zcs.Number = zc.Number AND zcs.DocumentTypeDataID = zc.DocumentTypeDataID AND zcs.MinorVersion = 0 	) ORDER BY zc.MajorVersion ASC'
-
+//select one, two, three from table inner join table1 on  condition1 and condition2 Left join ( select * from table2 where test ) t2 on t2condition where 1=1 or ( test = 1 and test =2 or ( test3 = test4 or test 5 = test6 ) )
 
